@@ -9,6 +9,7 @@
 		<!--生成的源代码写到我们选择的文件夹中-->
 		<EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
 		<CompilerGeneratedFilesOutputPath>$(BaseIntermediateOutputPath)Generated</CompilerGeneratedFilesOutputPath>
+		<Version>1.0.0.1-beta-2</Version>
 	</PropertyGroup>
 
 
