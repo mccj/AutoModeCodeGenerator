@@ -35,6 +35,7 @@ public class SourceGeneratorClassInfo : SourceGeneratorBaseInfo
     public string[]? Attributes { get; set; }
     public bool? IsPartial { get; set; }
     public bool InheritAttribute { get; set; }
+    public bool ToNullable { get; set; }
 }
 public class SourceGeneratorPropertyInfo : SourceGeneratorBaseInfo
 {

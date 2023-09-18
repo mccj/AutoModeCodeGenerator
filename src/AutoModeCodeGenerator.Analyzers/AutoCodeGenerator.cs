@@ -207,6 +207,7 @@ public partial class AutoCodeGenerator : IIncrementalGenerator
             NamespaceSuffix = getValue<string>(f.NamedArguments, "NamespaceSuffix"),
             IsAbstract = getValue<bool?>(f.NamedArguments, "IsAbstract"),
             InheritAttribute = getValue<bool?>(f.NamedArguments, "InheritAttribute") ?? false,
+            ToNullable = getValue<bool?>(f.NamedArguments, "ToNullable") ?? false,
         }).ToArray();
 
         var ss2 = symbol.GetMembers()
@@ -254,6 +255,7 @@ public partial class AutoCodeGenerator : IIncrementalGenerator
             IsAbstract = f.IsAbstract,
             Inherit = f.Inherit,
             InheritAttribute = f.InheritAttribute,
+            ToNullable = f.ToNullable,
             Propertes = ss2.Where(property => property.Id == f.Id || (property.Ids ?? new string[] { }).Contains(f.Id)).Select(property => new SourceGeneratorPropertyInfo
             {
                 Name = property.Name,

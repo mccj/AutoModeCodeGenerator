@@ -145,6 +145,10 @@ namespace AutoCodeGenerator
         /// 继承 Attribute
         /// </summary>
         public bool InheritAttribute { get; set; }
+        /// <summary>
+        /// 所有属性都允许空
+        /// </summary>
+        public bool ToNullable { get; set; }
     }
 
     /// <summary>
@@ -324,7 +328,7 @@ namespace AutoCodeGenerator
                     var sss103 = new[] {
                         ModifierToString(item.Modifier),
                         item.IsVirtual == true ? "virtual" : "",
-                        item.Type + (item.IsNullable == true ? "?" : ""),
+                        item.Type + (item.IsNullable == true || classInfo.ToNullable ? "?" : ""),
                         item.Prefix + item.Name + item.Suffix,
                         "{ get; set; }",
                         string.IsNullOrWhiteSpace(item.DefaultValue)?null:$"= {item.DefaultValue};"
