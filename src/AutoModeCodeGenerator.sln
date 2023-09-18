@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.7.34018.315
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Samples", "AutoModeCodeGenerator.Samples\Samples.csproj", "{112F4E8C-1AE0-4B5B-8CFB-5439412085FB}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AutoModeCodeGenerator.Analyzers", "AutoModeCodeGenerator.Analyzers\AutoModeCodeGenerator.Analyzers.csproj", "{0D110131-4912-4BE9-A043-E9F2DE915A47}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{112F4E8C-1AE0-4B5B-8CFB-5439412085FB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{112F4E8C-1AE0-4B5B-8CFB-5439412085FB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{112F4E8C-1AE0-4B5B-8CFB-5439412085FB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{112F4E8C-1AE0-4B5B-8CFB-5439412085FB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0D110131-4912-4BE9-A043-E9F2DE915A47}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0D110131-4912-4BE9-A043-E9F2DE915A47}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0D110131-4912-4BE9-A043-E9F2DE915A47}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0D110131-4912-4BE9-A043-E9F2DE915A47}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {49D81F2F-E97F-4BC2-BB19-6F3AB4CA3EA5}
+	EndGlobalSection
+EndGlobal
