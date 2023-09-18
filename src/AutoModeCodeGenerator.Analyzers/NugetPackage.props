@@ -1,5 +1,6 @@
 <Project>
 	<PropertyGroup>
+		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
 		<PackageProjectUrl>https://github.com/mccj/AutoModeCodeGenerator.git</PackageProjectUrl>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
 	</PropertyGroup>
