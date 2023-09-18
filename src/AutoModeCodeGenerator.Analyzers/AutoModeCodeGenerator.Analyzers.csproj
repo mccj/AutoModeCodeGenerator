@@ -36,4 +36,8 @@
 		<!-- 👇 使用项目不会获得对源生成器dLL本身的明引用 -->
 		<IncludeBuildOutput>false</IncludeBuildOutput>
 	</PropertyGroup>
+	<PropertyGroup>
+		<Version>1.0.0.1-beta-1</Version>
+		<PackageProjectUrl>https://github.com/mccj/AutoModeCodeGenerator.git</PackageProjectUrl>
+	</PropertyGroup>
 </Project>
