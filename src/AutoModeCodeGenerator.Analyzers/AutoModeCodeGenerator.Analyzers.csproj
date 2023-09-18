@@ -4,12 +4,11 @@
 		<TargetFramework>netstandard2.0</TargetFramework>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
-		<!-- 👇 提供 API 禁用分析功能，防止写出分析器不支持的代码-->
-		<EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
-		<!--https://developercommunity.visualstudio.com/content/problem/30940/cant-remove-netstandard-folder-from-output-path.html-->
-		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
 		<LangVersion>11.0</LangVersion>
 	</PropertyGroup>
+
+	<Import Project="CodeAnalyzers.props" />
+	<Import Project="NugetPackage.props" />
 
 	<ItemGroup>
 		<Compile Remove="OutputCodes\**" />
@@ -24,20 +23,5 @@
 		<PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.7.0" PrivateAssets="all" />
 		<PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="3.3.4" PrivateAssets="all" />
 	</ItemGroup>
-
-	<ItemGroup>
-		<!-- 👇 这确保了当我们使用`dotnet-pack`时，库将被打包为源生成器 -->
-		<!-- 👇 确保生成输出最终位于NuGet包的analyzers/dotnet/cs文件夹中。 确保dLL不会出现在NuGet包的normal”文件夹中。 -->
-		<None Include="$(OutputPath)\$(AssemblyName).dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
-	</ItemGroup>
-
-	<PropertyGroup>
-		<!-- 👇 我们不想在使用项目中直接引用源生成器dll -->
-		<!-- 👇 使用项目不会获得对源生成器dLL本身的明引用 -->
-		<IncludeBuildOutput>false</IncludeBuildOutput>
-	</PropertyGroup>
-	<PropertyGroup>
-		<Version>1.0.0.1-beta-1</Version>
-		<PackageProjectUrl>https://github.com/mccj/AutoModeCodeGenerator.git</PackageProjectUrl>
-	</PropertyGroup>
+	
 </Project>
