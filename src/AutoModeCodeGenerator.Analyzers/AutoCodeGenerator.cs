@@ -448,6 +448,7 @@ namespace AutoCodeGenerator
             NamespaceSuffix = getValue<string>(f.NamedArguments, "NamespaceSuffix"),
             IsAbstract = getValue<bool?>(f.NamedArguments, "IsAbstract"),
             InheritAttribute = getValue<bool?>(f.NamedArguments, "InheritAttribute") ?? false,
+            ToNullable = getValue<bool?>(f.NamedArguments, "ToNullable") ?? false,
         }).ToArray();
 
         var ss2 = symbol.GetMembers()
@@ -495,7 +496,8 @@ namespace AutoCodeGenerator
             IsAbstract = f.IsAbstract,
             Inherit = f.Inherit,
             InheritAttribute = f.InheritAttribute,
-            Propertes = ss2.Where(property => property.Id == f.Id || (property.Ids ?? new string[] { }).Contains(f.Id)).Select(property => new SourceGeneratorPropertyInfo
+            ToNullable = f.ToNullable,
+            Propertes = ss2.Where(property => property.Id == f.Id || (property.Ids ?? []).Contains(f.Id)).Select(property => new SourceGeneratorPropertyInfo
             {
                 Name = property.Name,
                 Prefix = property.Prefix,

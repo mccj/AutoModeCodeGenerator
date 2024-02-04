@@ -41,7 +41,7 @@ public static class SourceGeneratorHelper
             }));
 
         //引用
-        foreach (var item in generatorClassInfos.SelectMany(f => f.Usings ?? new string[] { }).Distinct().OrderBy(f => f))
+        foreach (var item in generatorClassInfos.SelectMany(f => f.Usings ?? []).Distinct().OrderBy(f => f))
             sourceBuilder.AppendLine($"using {item};");
         sourceBuilder.AppendLine();
         foreach (var namespaceInfo in generatorClassInfos.GroupBy(f => f.ClassNamespacePrefix + f.ClassNamespace + f.ClassNamespaceSuffix ?? "").OrderBy(f => f.Key).ToDictionary(f => f.Key))
@@ -66,10 +66,11 @@ public static class SourceGeneratorHelper
                 }
                 var strClassAttributes = string.Join("\r\n", classInfo.Attributes?.Select(f => "\t[" + f + "]") ?? new string[] { });
                 if (!string.IsNullOrWhiteSpace(strClassAttributes)) sourceBuilder.AppendLine(strClassAttributes);
-                var sss100 = string.Join(", ", new[] { classInfo.Inherit }.Concat(classInfo.Interfaces ?? new string[] { }).Where(f => !string.IsNullOrWhiteSpace(f)));
+                sourceBuilder.AppendLine($"\t[System.Diagnostics.DebuggerDisplay(\"{string.Join(", ", (classInfo.Propertes ?? []).Select(f => f.Name + $" = {{{f.Name}}}"))}\")]");
+                var sss100 = string.Join(", ", new[] { classInfo.Inherit }.Concat(classInfo.Interfaces ?? []).Where(f => !string.IsNullOrWhiteSpace(f)));
                 var sss101 = new[] { ModifierToString(classInfo.Modifier), classInfo.IsAbstract == true ? "abstract" : "", classInfo.IsPartial == true ? "partial" : "", "class", classInfo.Prefix + classInfo.Name + classInfo.Suffix, string.IsNullOrWhiteSpace(sss100) ? null : ":", sss100 };
                 sourceBuilder.AppendLine($"\t{string.Join(" ", sss101.Where(f => !string.IsNullOrWhiteSpace(f)))}\r\n\t{{");
-                foreach (var item in classInfo.Propertes ?? new SourceGeneratorPropertyInfo[] { })
+                foreach (var item in classInfo.Propertes ?? [])
                 {
                     sourceBuilder.AppendLine($"\t\t/// <summary>");
                     sourceBuilder.AppendLine($"\t\t/// " + item.SummaryPrefix + item.Summary + item.SummarySuffix);
@@ -86,7 +87,7 @@ public static class SourceGeneratorHelper
                         sourceBuilder.AppendLine($"\t\t/// " + item.Remarks);
                         sourceBuilder.AppendLine($"\t\t/// </remarks>");
                     }
-                    var strPropertyAttributes = string.Join("\r\n", ((item.Attributes ?? new string[] { }).Concat((classInfo.InheritAttribute ? item.InheritAttributes : null) ?? new string[] { }))?.Select(f => "\t\t[" + f + "]") ?? new string[] { });
+                    var strPropertyAttributes = string.Join("\r\n", ((item.Attributes ?? []).Concat((classInfo.InheritAttribute ? item.InheritAttributes : null) ?? []))?.Select(f => "\t\t[" + f + "]") ?? new string[] { });
                     if (!string.IsNullOrWhiteSpace(strPropertyAttributes)) sourceBuilder.AppendLine(strPropertyAttributes);
 
                     var sss103 = new[] {
