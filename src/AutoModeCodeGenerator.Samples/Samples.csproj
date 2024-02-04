@@ -14,8 +14,8 @@
 
 
 	<ItemGroup>
-		<None Remove="test.entity.json" />
-		<AdditionalFiles Include="test.entity.json" />
+		<None Remove="TestModel.entity.json" />
+		<AdditionalFiles Include="TestModel.entity.json" />
 	</ItemGroup>
 
 
