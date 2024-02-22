@@ -170,6 +170,14 @@ namespace AutoCodeGenerator
         /// </summary>
         public bool IsVirtual { get; set; }
         /// <summary>
+        /// 重写继承的成员
+        /// </summary>
+        public bool IsOverride { get; set; }
+        /// <summary>
+        /// 隐藏继承的成员
+        /// </summary>
+        public bool IsNew { get; set; }
+        /// <summary>
         /// 允许空
         /// </summary>
         public bool IsNullable { get; set; }
@@ -301,6 +309,7 @@ namespace AutoCodeGenerator
             }
             catch (Exception ex)
             {
+                //Debugger.Launch();
                 var InvalidError = new DiagnosticDescriptor(id: "Mccj001", title: "代码生成异常", messageFormat: "代码生成异常 '{0}'-{1}.", category: nameof(AutoCodeGenerator), DiagnosticSeverity.Error, isEnabledByDefault: true, description: ex.StackTrace);
                 ctx.ReportDiagnostic(Diagnostic.Create(InvalidError, Location.None, $"{symbol.ToDisplayString()}.g.cs", ex.Message));
             }
@@ -471,6 +480,8 @@ namespace AutoCodeGenerator
                      DefaultValue = getValue<string>(f.NamedArguments, "DefaultValue"),
                      Type = getValue<string>(f.NamedArguments, "PropertyType") ?? getValue<string>(f.NamedArguments, "PropertyTypeStr") ?? property.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)?.TrimEnd('?'),
                      IsVirtual = getValue<bool?>(f.NamedArguments, "IsVirtual"),
+                     IsOverride = getValue<bool?>(f.NamedArguments, "IsOverride"),
+                     IsNew = getValue<bool?>(f.NamedArguments, "IsNew"),
                      IsNullable = getValue<bool?>(f.NamedArguments, "IsNullable") ?? property.NullableAnnotation == NullableAnnotation.Annotated,
                      InheritAttributes = property.GetAttributes().Where(ff => ff.AttributeClass?.ToDisplayString() != autoCodePropertyAttributeStr).Select(ff => getAttributeContent(ff)).ToArray()
                  })).ToArray();
@@ -510,6 +521,8 @@ namespace AutoCodeGenerator
                 SummaryPrefix = property.SummaryPrefix,
                 SummarySuffix = property.SummarySuffix,
                 IsVirtual = property.IsVirtual,
+                IsOverride = property.IsOverride,
+                IsNew = property.IsNew,
                 Type = property.Type,
                 IsNullable = property.IsNullable,
                 DefaultValue = property.DefaultValue,

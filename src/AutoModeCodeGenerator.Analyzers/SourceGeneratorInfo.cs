@@ -41,11 +41,14 @@ public class SourceGeneratorPropertyInfo : SourceGeneratorBaseInfo
 {
     //public bool? IsReadonly { get; set; }
     public bool? IsVirtual { get; set; }
+    public bool? IsOverride { get; set; }
+    public bool? IsNew { get; set; }
     public string? Type { get; set; }
     public string? DefaultValue { get; set; }
     public bool? IsNullable { get; set; }
     public string[]? Attributes { get; set; }
     public string[]? InheritAttributes { get; set; }
+
 }
 /// <summary>
 /// 

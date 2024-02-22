@@ -72,6 +72,7 @@ public static class SourceGeneratorHelper
                 sourceBuilder.AppendLine($"\t{string.Join(" ", sss101.Where(f => !string.IsNullOrWhiteSpace(f)))}\r\n\t{{");
                 foreach (var item in classInfo.Propertes ?? [])
                 {
+                    if (new[] { item.IsVirtual, item.IsOverride, item.IsNew }.Where(f => f == true).Count() > 1) throw new Exception($"类型 {classInfo.Name} 属性 {item.Name} 的 AutoCodePropertyAttribute 特性中 IsVirtual、IsOverride、IsNew 只能一个为 true");
                     sourceBuilder.AppendLine($"\t\t/// <summary>");
                     sourceBuilder.AppendLine($"\t\t/// " + item.SummaryPrefix + item.Summary + item.SummarySuffix);
                     sourceBuilder.AppendLine($"\t\t/// </summary>");
@@ -91,8 +92,10 @@ public static class SourceGeneratorHelper
                     if (!string.IsNullOrWhiteSpace(strPropertyAttributes)) sourceBuilder.AppendLine(strPropertyAttributes);
 
                     var sss103 = new[] {
+                        item.IsNew == true ? "new" : "",
                         ModifierToString(item.Modifier),
                         item.IsVirtual == true ? "virtual" : "",
+                        item.IsOverride == true ? "override" : "",
                         item.Type + (item.IsNullable == true || classInfo.ToNullable ? "?" : ""),
                         item.Prefix + item.Name + item.Suffix,
                         "{ get; set; }",
