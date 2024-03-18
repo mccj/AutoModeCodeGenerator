@@ -25,6 +25,7 @@ namespace AutoCodeGenerator
     /// <summary>
     /// 
     /// </summary>
+    [global::System.Runtime.CompilerServices.CompilerGenerated]
     [AttributeUsage(AttributeTargets.Interface | AttributeTargets.Class | AttributeTargets.Property, AllowMultiple = true)]
     public abstract class AutoCodeClassBaseAttribute : Attribute
     {
@@ -82,6 +83,7 @@ namespace AutoCodeGenerator
     /// <summary>
     /// Nullable
     /// </summary>
+    [global::System.Runtime.CompilerServices.CompilerGenerated]
     [AttributeUsage(AttributeTargets.Interface | AttributeTargets.Class, Inherited = false, AllowMultiple = false)]
     public sealed class AutoCodeNullableAttribute : Attribute
     {
@@ -98,6 +100,7 @@ namespace AutoCodeGenerator
     /// <summary>
     /// 接口
     /// </summary>
+    [global::System.Runtime.CompilerServices.CompilerGenerated]
     [AttributeUsage(AttributeTargets.Interface | AttributeTargets.Class, Inherited = false, AllowMultiple = true)]
     public sealed class AutoCodeClassModesAttribute : AutoCodeClassBaseAttribute
     {
@@ -151,6 +154,7 @@ namespace AutoCodeGenerator
     /// <summary>
     /// 属性
     /// </summary>
+    [global::System.Runtime.CompilerServices.CompilerGenerated]
     [AttributeUsage(AttributeTargets.Property, Inherited = false, AllowMultiple = true)]
     public sealed class AutoCodePropertyAttribute : AutoCodeClassBaseAttribute
     {/// <summary>
@@ -188,6 +192,7 @@ namespace AutoCodeGenerator
     /// <summary>
     /// 修饰符
     /// </summary>
+    [global::System.Runtime.CompilerServices.CompilerGenerated]
     public enum AccessibilityEnum
     {
         /// <summary>
@@ -222,6 +227,7 @@ namespace AutoCodeGenerator
     /// <summary>
     /// 
     /// </summary>
+    [global::System.Runtime.CompilerServices.CompilerGenerated]
     public enum NullableEnum
     {
         /// <summary>
@@ -460,7 +466,7 @@ namespace AutoCodeGenerator
             ToNullable = getValue<bool?>(f.NamedArguments, "ToNullable") ?? false,
         }).ToArray();
 
-        var ss2 = symbol.GetMembers()
+        var ss2 = symbol.AllInterfaces.SelectMany(f => f.GetMembers()).Concat(symbol.GetMembers())
                  .Select(member => member as IPropertySymbol)
                  .Where(property => property != null)
                  .SelectMany(property => property?.GetAttributes().Where(f => f.AttributeClass?.ToDisplayString() == autoCodePropertyAttributeStr).Select(f => new

@@ -66,7 +66,8 @@ public static class SourceGeneratorHelper
                 }
                 var strClassAttributes = string.Join("\r\n", classInfo.Attributes?.Select(f => "\t[" + f + "]") ?? new string[] { });
                 if (!string.IsNullOrWhiteSpace(strClassAttributes)) sourceBuilder.AppendLine(strClassAttributes);
-                sourceBuilder.AppendLine($"\t[System.Diagnostics.DebuggerDisplay(\"{string.Join(", ", (classInfo.Propertes ?? []).Select(f => f.Name + $" = {{{f.Name}}}"))}\")]");
+                sourceBuilder.AppendLine($"\t[global::System.Runtime.CompilerServices.CompilerGenerated]");
+                sourceBuilder.AppendLine($"\t[global::System.Diagnostics.DebuggerDisplay(\"{string.Join(", ", (classInfo.Propertes ?? []).Select(f => f.Name + $" = {{{f.Name}}}"))}\")]");
                 var sss100 = string.Join(", ", new[] { classInfo.Inherit }.Concat(classInfo.Interfaces ?? []).Where(f => !string.IsNullOrWhiteSpace(f)));
                 var sss101 = new[] { ModifierToString(classInfo.Modifier), classInfo.IsAbstract == true ? "abstract" : "", classInfo.IsPartial == true ? "partial" : "", "class", classInfo.Prefix + classInfo.Name + classInfo.Suffix, string.IsNullOrWhiteSpace(sss100) ? null : ":", sss100 };
                 sourceBuilder.AppendLine($"\t{string.Join(" ", sss101.Where(f => !string.IsNullOrWhiteSpace(f)))}\r\n\t{{");

@@ -20,7 +20,7 @@
 
 
 	<ItemGroup>
-		<PackageReference Include="AutoModeCodeGenerator.Analyzers" Version="1.0.0.1-beta-2" PrivateAssets="all" />
+		<PackageReference Include="AutoModeCodeGenerator.Analyzers" Version="1.0.0.5" PrivateAssets="all" />
 		<!--<ProjectReference Include="..\AutoModeCodeGenerator.Analyzers\AutoModeCodeGenerator.Analyzers.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />-->
 	</ItemGroup>
 
