@@ -466,7 +466,7 @@ namespace AutoCodeGenerator
             ToNullable = getValue<bool?>(f.NamedArguments, "ToNullable") ?? false,
         }).ToArray();
 
-        var ss2 = symbol.AllInterfaces.SelectMany(f => f.GetMembers()).Concat(symbol.GetMembers())
+        var ss2 = symbol.GetMembers().Concat(symbol.AllInterfaces.SelectMany(f => f.GetMembers()))
                  .Select(member => member as IPropertySymbol)
                  .Where(property => property != null)
                  .SelectMany(property => property?.GetAttributes().Where(f => f.AttributeClass?.ToDisplayString() == autoCodePropertyAttributeStr).Select(f => new
