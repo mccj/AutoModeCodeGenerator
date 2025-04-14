@@ -149,6 +149,10 @@ namespace AutoCodeGenerator
         /// 所有属性都允许空
         /// </summary>
         public bool ToNullable { get; set; }
+        /// <summary>
+        /// 生成的类库样式
+        /// </summary>
+        public ClassStyleEnum ClassStyle { get; set; }
     }
 
     /// <summary>
@@ -266,6 +270,52 @@ namespace AutoCodeGenerator
         /// 将可为空警告上下文还原为项目设置。
         /// </summary>
         RestoreWarnings
+    }
+    /// <summary>
+    /// 生成的类库样式
+    /// </summary>
+    [global::System.Runtime.CompilerServices.CompilerGenerated]
+    public enum ClassStyleEnum
+    {
+        Poco,
+        Record,
+        Inpc
+    }
+    /// <summary>
+    /// Inpc 模式基类
+    /// </summary>
+    [global::System.Runtime.CompilerServices.CompilerGenerated]
+    public abstract class InpcPropertyBindableBaseAbstract
+    {
+        protected internal global::System.Collections.Generic.Dictionary<string, object> keyValuePairs = new global::System.Collections.Generic.Dictionary<string, object>();
+        /// <summary>
+        /// 获取属性值
+        /// </summary>
+        /// <typeparam name=""T"">属性类型</typeparam>
+        /// <param name=""defaultValue"">不存在当前值时，返回的默认值</param>
+        /// <param name=""propertyName"">属性名称</param>
+        /// <returns>返回的值，或者默认值</returns>
+        protected virtual T GetValue<T>(T defaultValue = default, [global::System.Runtime.CompilerServices.CallerMemberName] string propertyName = null)
+        {
+            if (keyValuePairs.TryGetValue(propertyName, out var value))
+                return (T)value;
+            else return defaultValue;
+        }
+        /// <summary>
+        /// 设置属性值
+        /// </summary>
+        /// <typeparam name=""T"">属性类型</typeparam>
+        /// <param name=""value"">需要设置的属性值</param>
+        /// <param name=""propertyName"">属性名称</param>
+        protected virtual void SetValue<T>(T value, [global::System.Runtime.CompilerServices.CallerMemberName] string propertyName = null)
+        {
+            keyValuePairs[propertyName] = value;
+        }
+        /// <summary>
+        /// 属性修改时触发
+        /// </summary>
+        /// <param name=""propertyName""></param>
+        protected virtual void RaisePropertyChanged([System.Runtime.CompilerServices.CallerMemberName] string propertyName = null) { }
     }
 }";
 
@@ -409,8 +459,8 @@ namespace AutoCodeGenerator
             stringBuilder.Append(className);
             stringBuilder.Append("(");
 
-            var ss1 = attribute.ConstructorArguments.Select(constructorArgument => getCSharpString(constructorArgument)).ToArray();
-            var ss2 = attribute.NamedArguments.Select(namedArgument => namedArgument.Key + " = " + getCSharpString(namedArgument.Value)).ToArray();
+            //var ss111 = attribute.ConstructorArguments.Select(constructorArgument => getCSharpString(constructorArgument)).ToArray();
+            //var ss222 = attribute.NamedArguments.Select(namedArgument => namedArgument.Key + " = " + getCSharpString(namedArgument.Value)).ToArray();
             bool first = true;
 
             foreach (var constructorArgument in attribute.ConstructorArguments)
@@ -441,7 +491,7 @@ namespace AutoCodeGenerator
 
             return stringBuilder.ToString();
         };
-        var ss1 = attributeDatas.Where(f => f.AttributeClass?.ToDisplayString() == autoCodeClassModesAttributeStr).Select(f => new
+        var classModes = attributeDatas.Where(f => f.AttributeClass?.ToDisplayString() == autoCodeClassModesAttributeStr).Select(f => new
         {
             Name = getValue<string>(f.NamedArguments, "Name") ?? symbol.Name,
             Prefix = getValue<string>(f.NamedArguments, "Prefix"),
@@ -464,9 +514,10 @@ namespace AutoCodeGenerator
             IsAbstract = getValue<bool?>(f.NamedArguments, "IsAbstract"),
             InheritAttribute = getValue<bool?>(f.NamedArguments, "InheritAttribute") ?? false,
             ToNullable = getValue<bool?>(f.NamedArguments, "ToNullable") ?? false,
+            ClassStyle = getValue<ClassStyleEnum?>(f.NamedArguments, "ClassStyle") ?? ClassStyleEnum.Poco,
         }).ToArray();
 
-        var ss2 = symbol.GetMembers().Concat(symbol.AllInterfaces.SelectMany(f => f.GetMembers()))
+        var classMembers = symbol.GetMembers().Concat(symbol.AllInterfaces.SelectMany(f => f.GetMembers()))
                  .Select(member => member as IPropertySymbol)
                  .Where(property => property != null)
                  .SelectMany(property => property?.GetAttributes().Where(f => f.AttributeClass?.ToDisplayString() == autoCodePropertyAttributeStr).Select(f => new
@@ -492,40 +543,41 @@ namespace AutoCodeGenerator
                      InheritAttributes = property.GetAttributes().Where(ff => ff.AttributeClass?.ToDisplayString() != autoCodePropertyAttributeStr).Select(ff => getAttributeContent(ff)).ToArray()
                  })).ToArray();
 
-        var sourceGeneratorClassInfos = ss1.Select(f => new SourceGeneratorClassInfo
+        var sourceGeneratorClassInfos = classModes.Select(f => new SourceGeneratorClassInfo
         {
-            Name = f.Name,
-            Prefix = f.Prefix,
-            Suffix = f.Suffix,
+            Name = f.Prefix + f.Name + f.Suffix,
+            //Prefix = f.Prefix,
+            //Suffix = f.Suffix,
             Modifier = f.Modifier,
             IsPartial = f.IsPartial,
             Attributes = f.Attributes,
             Remarks = f.Remarks,
             Example = f.Example,
-            Summary = f.Summary,
-            SummaryPrefix = f.SummaryPrefix,
-            SummarySuffix = f.SummarySuffix,
-            ClassNamespace = f.Namespace,
-            ClassNamespaceSuffix = f.NamespaceSuffix,
-            ClassNamespacePrefix = f.NamespacePrefix,
+            Summary = f.SummaryPrefix + f.Summary + f.SummarySuffix,
+            //SummaryPrefix = f.SummaryPrefix,
+            //SummarySuffix = f.SummarySuffix,
+            ClassNamespace = f.NamespacePrefix + f.Namespace + f.NamespaceSuffix,
+            //ClassNamespaceSuffix = f.NamespaceSuffix,
+            //ClassNamespacePrefix = f.NamespacePrefix,
             Usings = f.Usings,
             Interfaces = f.Interfaces,
             IsAbstract = f.IsAbstract,
             Inherit = f.Inherit,
             InheritAttribute = f.InheritAttribute,
             ToNullable = f.ToNullable,
-            Propertes = ss2.Where(property => property.Id == f.Id || (property.Ids ?? []).Contains(f.Id)).Select(property => new SourceGeneratorPropertyInfo
+            ClassStyle = f.ClassStyle,
+            Propertes = classMembers.Where(property => property.Id == f.Id || (property.Ids ?? []).Contains(f.Id)).Select(property => new SourceGeneratorPropertyInfo
             {
-                Name = property.Name,
-                Prefix = property.Prefix,
-                Suffix = property.Suffix,
+                Name = property.Prefix + property.Name + property.Suffix,
+                //Prefix = property.Prefix,
+                //Suffix = property.Suffix,
                 Modifier = property.Modifier,
                 Attributes = property.Attributes,
                 Remarks = property.Remarks,
                 Example = property.Example,
-                Summary = property.Summary,
-                SummaryPrefix = property.SummaryPrefix,
-                SummarySuffix = property.SummarySuffix,
+                Summary = property.SummaryPrefix + property.Summary + property.SummarySuffix,
+                //SummaryPrefix = property.SummaryPrefix,
+                //SummarySuffix = property.SummarySuffix,
                 IsVirtual = property.IsVirtual,
                 IsOverride = property.IsOverride,
                 IsNew = property.IsNew,

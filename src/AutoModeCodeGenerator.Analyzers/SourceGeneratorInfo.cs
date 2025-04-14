@@ -7,21 +7,23 @@ public class SourceGeneratorBaseInfo
     /// 
     /// </summary>
     public string? Name { get; set; }
-    public string? Prefix { get; set; }
-    public string? Suffix { get; set; }
+    //public string? Prefix { get; set; }
+    //public string? Suffix { get; set; }
     public Accessibility? Modifier { get; set; }
     /// <summary>
     /// 
     /// </summary>
     public string? Summary { get; set; }
-    public string? SummaryPrefix { get; set; }
-    public string? SummarySuffix { get; set; }
+    //public string? SummaryPrefix { get; set; }
+    //public string? SummarySuffix { get; set; }
     public string? Remarks { get; set; }
     public string? Example { get; set; }
 }
 public class SourceGeneratorClassInfo : SourceGeneratorBaseInfo
 {
     public string? ClassNamespace { get; set; } = "";
+    //public string? ClassNamespacePrefix { get; set; }
+    //public string? ClassNamespaceSuffix { get; set; }
     /// <summary>
     /// 
     /// </summary>
@@ -30,12 +32,11 @@ public class SourceGeneratorClassInfo : SourceGeneratorBaseInfo
     public bool? IsAbstract { get; set; }
     public string? Inherit { get; set; }
     public SourceGeneratorPropertyInfo[]? Propertes { get; set; }
-    public string? ClassNamespacePrefix { get; set; }
-    public string? ClassNamespaceSuffix { get; set; }
     public string[]? Attributes { get; set; }
     public bool? IsPartial { get; set; }
     public bool InheritAttribute { get; set; }
     public bool ToNullable { get; set; }
+    public ClassStyleEnum ClassStyle { get; set; }
 }
 public class SourceGeneratorPropertyInfo : SourceGeneratorBaseInfo
 {
@@ -91,4 +92,10 @@ public enum NullableEnum
     /// 将可为空警告上下文还原为项目设置。
     /// </summary>
     RestoreWarnings
+}
+public enum ClassStyleEnum
+{
+    Poco,
+    Record,
+    Inpc
 }

@@ -3,17 +3,17 @@
 #nullable enable
 
 [AutoCodeGenerator.AutoCodeNullable(Type = AutoCodeGenerator.NullableEnum.Enable)]
-[AutoCodeGenerator.AutoCodeClassModes(Id = "a1", Namespace = "bbb", Suffix = "ccc", Summary = "eeeeeeeeeeeeeeeeee", Modifier = AutoCodeGenerator.AccessibilityEnum.Internal)]
-[AutoCodeGenerator.AutoCodeClassModes(Id = "a2", Namespace = "ccc", InheritAttribute = true)]
+[AutoCodeGenerator.AutoCodeClassModes(Id = "a1", Namespace = "bbb", Suffix = "ccc", Summary = "eeeeeeeeeeeeeeeeee", Modifier = AutoCodeGenerator.AccessibilityEnum.Internal, ClassStyle = AutoCodeGenerator.ClassStyleEnum.Record)]
+[AutoCodeGenerator.AutoCodeClassModes(Id = "a2", Namespace = "ccc", InheritAttribute = true, ClassStyle = AutoCodeGenerator.ClassStyleEnum.Inpc,InheritType =typeof(AutoCodeGenerator.InpcPropertyBindableBaseAbstract))]
 public interface Point1
 {
     [AutoCodeGenerator.AutoCodeProperty(Ids = new[] { "a1", "a2" })]
-    public double X { get; set; }
+    public double Xxxxx { get; set; }
 }
 
 [AutoCodeGenerator.AutoCodeNullable(Type = AutoCodeGenerator.NullableEnum.Enable)]
-[AutoCodeGenerator.AutoCodeClassModes(Id = "a1", Namespace = "bbb", Suffix = "ccc", Summary = "eeeeeeeeeeeeeeeeee",Modifier = AutoCodeGenerator.AccessibilityEnum.Internal)]
-[AutoCodeGenerator.AutoCodeClassModes(Id = "a2", Namespace = "ccc", InheritAttribute=true)]
+[AutoCodeGenerator.AutoCodeClassModes(Id = "a1", Namespace = "bbb", Suffix = "ccc", Summary = "eeeeeeeeeeeeeeeeee", Modifier = AutoCodeGenerator.AccessibilityEnum.Internal)]
+[AutoCodeGenerator.AutoCodeClassModes(Id = "a2", Namespace = "ccc", InheritAttribute = true)]
 public abstract class Point2 //: Point1
 {
     [AutoCodeGenerator.AutoCodeProperty(Id = "a1")]

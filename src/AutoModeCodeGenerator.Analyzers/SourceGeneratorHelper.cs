@@ -45,13 +45,15 @@ public static class SourceGeneratorHelper
         foreach (var item in generatorClassInfos.SelectMany(f => f.Usings ?? []).Distinct().OrderBy(f => f))
             sourceBuilder.AppendLine($"using {item};");
         sourceBuilder.AppendLine();
-        foreach (var namespaceInfo in generatorClassInfos.GroupBy(f => f.ClassNamespacePrefix + f.ClassNamespace + f.ClassNamespaceSuffix ?? "").OrderBy(f => f.Key).ToDictionary(f => f.Key))
+        foreach (var namespaceInfo in generatorClassInfos.GroupBy(f => f.ClassNamespace ?? "").OrderBy(f => f.Key).ToDictionary(f => f.Key))
         {
             if (!string.IsNullOrWhiteSpace(namespaceInfo.Key)) sourceBuilder.AppendLine($"namespace {namespaceInfo.Key}\r\n{{");
             foreach (var classInfo in namespaceInfo.Value)
             {
+                //if (classInfo.ClassStyle == ClassStyleEnum.Inpc && true) throw new Exception("类型样式 Inpc 必须继承 AutoCodeGenerator.InpcPropertyBindableBaseAbstract");
+
                 sourceBuilder.AppendLine($"\t/// <summary>");
-                sourceBuilder.AppendLine($"\t/// " + classInfo.SummaryPrefix + classInfo.Summary + classInfo.SummarySuffix);
+                sourceBuilder.AppendLine($"\t/// " + classInfo.Summary);
                 sourceBuilder.AppendLine($"\t/// </summary>");
                 if (!string.IsNullOrWhiteSpace(classInfo.Example))
                 {
@@ -68,15 +70,22 @@ public static class SourceGeneratorHelper
                 var strClassAttributes = string.Join("\r\n", classInfo.Attributes?.Where(f => !string.IsNullOrWhiteSpace(f))?.Select(f => "\t[" + f + "]") ?? new string[] { });
                 if (!string.IsNullOrWhiteSpace(strClassAttributes)) sourceBuilder.AppendLine(strClassAttributes);
                 sourceBuilder.AppendLine($"\t[global::System.Runtime.CompilerServices.CompilerGenerated]");
-                if (classInfo.Propertes?.Length > 0) sourceBuilder.AppendLine($"\t[global::System.Diagnostics.DebuggerDisplay(\"{string.Join(", ", (classInfo.Propertes ?? []).Select(f => f.Prefix + f.Name + f.Suffix).Select(f => f + $" = {{{f}}}"))}\")]");
+                if (classInfo.Propertes?.Length > 0) sourceBuilder.AppendLine($"\t[global::System.Diagnostics.DebuggerDisplay(\"{string.Join(", ", (classInfo.Propertes ?? []).Select(f => f.Name).Select(f => f + $" = {{{f}}}"))}\")]");
                 var sss100 = string.Join(", ", new[] { classInfo.Inherit }.Concat(classInfo.Interfaces ?? []).Where(f => !string.IsNullOrWhiteSpace(f)));
-                var sss101 = new[] { ModifierToString(classInfo.Modifier), classInfo.IsAbstract == true ? "abstract" : "", classInfo.IsPartial == true ? "partial" : "", "class", classInfo.Prefix + classInfo.Name + classInfo.Suffix, string.IsNullOrWhiteSpace(sss100) ? null : ":", sss100 };
+                var sss101 = new[] { ModifierToString(classInfo.Modifier), classInfo.IsAbstract == true ? "abstract" : "", classInfo.IsPartial == true ? "partial" : "", "class", classInfo.Name, string.IsNullOrWhiteSpace(sss100) ? null : ":", sss100 };
                 sourceBuilder.AppendLine($"\t{string.Join(" ", sss101.Where(f => !string.IsNullOrWhiteSpace(f)))}\r\n\t{{");
+                if (classInfo.ClassStyle == ClassStyleEnum.Record)
+                {
+                    var constructorStrs = (classInfo.Propertes ?? []).Select(item => $"{item.Type + (item.IsNullable == true || classInfo.ToNullable ? "?" : "")} @{LowerFirstLetter(item.Name)}").ToArray();
+                    var fieldStrs = (classInfo.Propertes ?? []).Select(item => $"\t\t\tthis.{item.Name} = @{LowerFirstLetter(item.Name)};").ToArray();
+                    sourceBuilder.AppendLine($"\t\tpublic {classInfo.Name}({string.Join(",", constructorStrs)})\r\n\t\t{{\r\n{string.Join("\r\n", fieldStrs)}\r\n\t\t}}");
+                }
+
                 foreach (var item in classInfo.Propertes ?? [])
                 {
                     if (new[] { item.IsVirtual, item.IsOverride, item.IsNew }.Where(f => f == true).Count() > 1) throw new Exception($"类型 {classInfo.Name} 属性 {item.Name} 的 AutoCodePropertyAttribute 特性中 IsVirtual、IsOverride、IsNew 只能一个为 true");
                     sourceBuilder.AppendLine($"\t\t/// <summary>");
-                    sourceBuilder.AppendLine($"\t\t/// " + item.SummaryPrefix + item.Summary + item.SummarySuffix);
+                    sourceBuilder.AppendLine($"\t\t/// " + item.Summary);
                     sourceBuilder.AppendLine($"\t\t/// </summary>");
                     if (!string.IsNullOrWhiteSpace(item.Example))
                     {
@@ -99,8 +108,11 @@ public static class SourceGeneratorHelper
                         item.IsVirtual == true ? "virtual" : "",
                         item.IsOverride == true ? "override" : "",
                         item.Type + (item.IsNullable == true || classInfo.ToNullable ? "?" : ""),
-                        item.Prefix + item.Name + item.Suffix,
-                        "{ get; set; }",
+                        item.Name ,
+                        "{",
+                        classInfo.ClassStyle != ClassStyleEnum.Inpc ?  "get;":$"get {{ return base.GetValue<{item.Type + (item.IsNullable == true || classInfo.ToNullable ? "?" : "")}>(default); }}",
+                        classInfo.ClassStyle switch{ ClassStyleEnum.Record=>null, ClassStyleEnum.Inpc=>$"set {{ if (GetValue<{item.Type + (item.IsNullable == true || classInfo.ToNullable ? "?" : "")}>(default) != value) {{ SetValue(value); RaisePropertyChanged(); }} }}",_=>"set;" },
+                        "}",
                         string.IsNullOrWhiteSpace(item.DefaultValue)?null:$"= {item.DefaultValue};"
                     };
                     sourceBuilder.AppendLine($"\t\t{string.Join(" ", sss103.Where(f => !string.IsNullOrWhiteSpace(f)))}");
@@ -124,5 +136,19 @@ public static class SourceGeneratorHelper
             Accessibility.ProtectedAndInternal => "private protected",
             _ => ""
         };
+    }
+    /// <summary>
+    /// 首字母小写
+    /// </summary>
+    /// <param name="str"></param>
+    /// <returns></returns>
+    private static string? LowerFirstLetter(string? str)
+    {
+        if (str == null) return null;
+        if (string.IsNullOrEmpty(str) || str.Length == 1)
+        {
+            return str; // 如果字符串为空或只有一个字符，直接返回原字符串
+        }
+        return char.ToLower(str[0]) + str.Substring(1); // 将首字母转为小写并连接剩余部分
     }
 }
