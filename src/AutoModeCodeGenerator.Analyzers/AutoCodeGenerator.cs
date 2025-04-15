@@ -1,4 +1,5 @@
 ﻿using System.Collections.Immutable;
+using System.Linq;
 using System.Text;
 using System.Xml.Linq;
 using System.Xml.XPath;
@@ -453,7 +454,7 @@ namespace AutoCodeGenerator
         //    genericsOptions: SymbolDisplayGenericsOptions.IncludeTypeParameters,
         //    miscellaneousOptions: SymbolDisplayMiscellaneousOptions.EscapeKeywordIdentifiers | SymbolDisplayMiscellaneousOptions.UseSpecialTypes
         //);
-        var attributeDatas = symbol.GetAttributes();
+        var attributeDatas = symbol.GetAttributes().Concat(symbol.Interfaces.SelectMany(f => f.GetAttributes())).ToArray();
         var autoCodeNullableAttribute = attributeDatas.FirstOrDefault(f => f.AttributeClass?.ToDisplayString() == autoCodeNullableAttributeStr);
         //var w4 = autoCodeNullableAttribute?.ConstructorArguments.FirstOrDefault();
         //var dsfsd = w4.HasValue ? getValue<NullableEnum?>(w4.Value) : null;
