@@ -163,7 +163,8 @@ namespace AutoCodeGenerator
     [global::System.Runtime.CompilerServices.CompilerGenerated]
     [AttributeUsage(AttributeTargets.Property, Inherited = false, AllowMultiple = true)]
     public sealed class AutoCodePropertyAttribute : AutoCodeClassBaseAttribute
-    {/// <summary>
+    {
+        /// <summary>
         /// 关联id
         /// </summary>
         public string[]? Ids { get; set; }
@@ -331,6 +332,10 @@ namespace AutoCodeGenerator
         /// </summary>
         public string? Id { get; set; }
         /// <summary>
+        /// 关联id
+        /// </summary>
+        public string[]? Ids { get; set; }
+        /// <summary>
         ///  Nullable 类型
         /// </summary>
         public string[] Attributes { get; set; }
@@ -454,7 +459,7 @@ namespace AutoCodeGenerator
         //    genericsOptions: SymbolDisplayGenericsOptions.IncludeTypeParameters,
         //    miscellaneousOptions: SymbolDisplayMiscellaneousOptions.EscapeKeywordIdentifiers | SymbolDisplayMiscellaneousOptions.UseSpecialTypes
         //);
-        var attributeDatas = symbol.GetAttributes().Concat(symbol.Interfaces.SelectMany(f => f.GetAttributes())).ToArray();
+        var attributeDatas = symbol.GetAttributes().Concat(symbol.AllInterfaces.SelectMany(f => f.GetAttributes())).ToArray();
         var autoCodeNullableAttribute = attributeDatas.FirstOrDefault(f => f.AttributeClass?.ToDisplayString() == autoCodeNullableAttributeStr);
         //var w4 = autoCodeNullableAttribute?.ConstructorArguments.FirstOrDefault();
         //var dsfsd = w4.HasValue ? getValue<NullableEnum?>(w4.Value) : null;
@@ -518,7 +523,7 @@ namespace AutoCodeGenerator
                 Suffix = getValue<string>(f.NamedArguments, "Suffix"),
                 Modifier = getValue<Accessibility?>(f.NamedArguments, "Modifier") ?? symbol.DeclaredAccessibility,
                 IsPartial = getValue<bool?>(f.NamedArguments, "IsPartial") ?? true,
-                Attributes = (getValues<string>(f.NamedArguments, "Attributes") as string[] ?? []).Concat(attributeDatas.Where(ff => ff.AttributeClass?.ToDisplayString() == customAttributeAttributeStr).Where(ff => getValue<string>(ff.NamedArguments, "Id") == f.Id).SelectMany(ff => getValues<string>(ff.NamedArguments, "Attributes") as string[] ?? []).ToArray()).ToArray(),
+                Attributes = (getValues<string>(f.NamedArguments, "Attributes") as string[] ?? []).Concat(attributeDatas.Where(ff => ff.AttributeClass?.ToDisplayString() == customAttributeAttributeStr).Where(ff => getValue<string>(ff.NamedArguments, "Id") == f.Id || (getValues<string>(ff.NamedArguments, "Ids") ?? []).Contains(f.Id)).SelectMany(ff => getValues<string>(ff.NamedArguments, "Attributes") as string[] ?? []).ToArray()).ToArray(),
                 Remarks = getValue<string>(f.NamedArguments, "Remarks"),
                 Example = getValue<string>(f.NamedArguments, "Example"),
                 SummaryPrefix = getValue<string>(f.NamedArguments, "SummaryPrefix"),

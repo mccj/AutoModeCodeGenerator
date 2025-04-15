@@ -14,7 +14,7 @@ public interface Point1
 [AutoCodeGenerator.AutoCodeNullable(Type = AutoCodeGenerator.NullableEnum.Enable)]
 [AutoCodeGenerator.AutoCodeClassModes(Id = "a1", Namespace = "bbb", Suffix = "ccc", Summary = "eeeeeeeeeeeeeeeeee", Modifier = AutoCodeGenerator.AccessibilityEnum.Internal)]
 [AutoCodeGenerator.AutoCodeClassModes(Id = "a2", Namespace = "ccc", InheritAttribute = true)]
-public abstract class Point2: eeee
+public interface Point2: eeee
 {
     [AutoCodeGenerator.AutoCodeProperty(Id = "a1")]
     [AutoCodeGenerator.AutoCodeProperty(Id = "a2")]
@@ -26,10 +26,16 @@ public abstract class Point2: eeee
 
     [AutoCodeGenerator.AutoCodeProperty(Ids = new[] { "a1", "a2" })]
     [DisplayName("sssssssssssssssss")]
-    public long? ProjectId { get; set; } = 300;
+    public long? ProjectId { get; set; }
 }
-//[AutoCodeGenerator.CustomAttribute(Id = "a2", Attributes = ["dddddddddddddddddddddddddddddddddd"])]
-public interface eeee
+public interface eeee: eeee1
 {
 
+}
+//[AutoCodeGenerator.CustomAttribute(Ids = ["a2"], Attributes = ["dddddddddddddddddddddddddddddddddd"])]
+public interface eeee1
+{
+    [AutoCodeGenerator.AutoCodeProperty(Id = "a1")]
+    [AutoCodeGenerator.AutoCodeProperty(Id = "a2")]
+    string? Name111 { get; set; }
 }
