@@ -324,7 +324,7 @@ namespace AutoCodeGenerator
     /// 自定义 Attribute
     /// </summary>
     [global::System.Runtime.CompilerServices.CompilerGenerated]
-    [AttributeUsage(AttributeTargets.Interface | AttributeTargets.Class, Inherited = true, AllowMultiple = true)]
+    [AttributeUsage(AttributeTargets.Property | AttributeTargets.Interface | AttributeTargets.Class, Inherited = true, AllowMultiple = true)]
     public sealed class CustomAttributeAttribute : Attribute
     {
         /// <summary>
@@ -515,32 +515,32 @@ namespace AutoCodeGenerator
             return stringBuilder.ToString();
         };
         var classModes = attributeDatas.Where(f => f.AttributeClass?.ToDisplayString() == autoCodeClassModesAttributeStr)
-            .Select(f => new { f.NamedArguments, Id = getValue<string>(f.NamedArguments, "Id") })
-            .Select(f => new
+            .Select(mode => new { mode.NamedArguments, Id = getValue<string>(mode.NamedArguments, "Id") })
+            .Select(mode => new
             {
-                Name = getValue<string>(f.NamedArguments, "Name") ?? symbol.Name,
-                Prefix = getValue<string>(f.NamedArguments, "Prefix"),
-                Suffix = getValue<string>(f.NamedArguments, "Suffix"),
-                Modifier = getValue<Accessibility?>(f.NamedArguments, "Modifier") ?? symbol.DeclaredAccessibility,
-                IsPartial = getValue<bool?>(f.NamedArguments, "IsPartial") ?? true,
-                Attributes = (getValues<string>(f.NamedArguments, "Attributes") as string[] ?? []).Concat(attributeDatas.Where(ff => ff.AttributeClass?.ToDisplayString() == customAttributeAttributeStr).Where(ff => getValue<string>(ff.NamedArguments, "Id") == f.Id || (getValues<string>(ff.NamedArguments, "Ids") ?? []).Contains(f.Id)).SelectMany(ff => getValues<string>(ff.NamedArguments, "Attributes") as string[] ?? []).ToArray()).ToArray(),
-                Remarks = getValue<string>(f.NamedArguments, "Remarks"),
-                Example = getValue<string>(f.NamedArguments, "Example"),
-                SummaryPrefix = getValue<string>(f.NamedArguments, "SummaryPrefix"),
-                SummarySuffix = getValue<string>(f.NamedArguments, "SummarySuffix"),
-                Summary = getValue<string>(f.NamedArguments, "Summary") ?? getDocSummary(symbol.GetDocumentationCommentXml(cancellationToken: cancellationToken)) ?? symbol.Name,
-                Id = f.Id,
-                Inherit = getValue<string>(f.NamedArguments, "InheritType") ?? getValue<string>(f.NamedArguments, "InheritStr"),
-                Interfaces = (getValues<string>(f.NamedArguments, "InterfaceTypes") ?? getValues<string>(f.NamedArguments, "InterfaceStrs")) as string[],
-                Usings = getValues<string>(f.NamedArguments, "Usings") as string[],
-                Namespace = getValue<string>(f.NamedArguments, "Namespace") ?? (symbol.ContainingNamespace?.IsGlobalNamespace == true ? "AutoGenerator" : symbol.ContainingNamespace?.ToDisplayString() + ".AutoGenerator"),
-                NamespacePrefix = getValue<string>(f.NamedArguments, "NamespacePrefix"),
-                NamespaceSuffix = getValue<string>(f.NamedArguments, "NamespaceSuffix"),
-                IsAbstract = getValue<bool?>(f.NamedArguments, "IsAbstract"),
-                InheritAttribute = getValue<bool?>(f.NamedArguments, "InheritAttribute") ?? false,
-                ToNullable = getValue<bool?>(f.NamedArguments, "ToNullable") ?? false,
-                ClassStyle = getValue<ClassStyleEnum?>(f.NamedArguments, "ClassStyle") ?? ClassStyleEnum.Poco,
-            }).ToArray();
+                Name = getValue<string>(mode.NamedArguments, "Name") ?? symbol.Name,
+                Prefix = getValue<string>(mode.NamedArguments, "Prefix"),
+                Suffix = getValue<string>(mode.NamedArguments, "Suffix"),
+                Modifier = getValue<Accessibility?>(mode.NamedArguments, "Modifier") ?? symbol.DeclaredAccessibility,
+                IsPartial = getValue<bool?>(mode.NamedArguments, "IsPartial") ?? true,
+                Attributes = (getValues<string>(mode.NamedArguments, "Attributes") as string[] ?? []).Concat(attributeDatas.Where(ff => ff.AttributeClass?.ToDisplayString() == customAttributeAttributeStr && (getValue<string>(ff.NamedArguments, "Id") == mode.Id || (getValues<string>(ff.NamedArguments, "Ids") ?? []).Contains(mode.Id))).SelectMany(ff => getValues<string>(ff.NamedArguments, "Attributes") as string[] ?? []).ToArray()).ToArray(),
+                Remarks = getValue<string>(mode.NamedArguments, "Remarks"),
+                Example = getValue<string>(mode.NamedArguments, "Example"),
+                SummaryPrefix = getValue<string>(mode.NamedArguments, "SummaryPrefix"),
+                SummarySuffix = getValue<string>(mode.NamedArguments, "SummarySuffix"),
+                Summary = getValue<string>(mode.NamedArguments, "Summary") ?? getDocSummary(symbol.GetDocumentationCommentXml(cancellationToken: cancellationToken)) ?? symbol.Name,
+                Id = mode.Id,
+                Inherit = getValue<string>(mode.NamedArguments, "InheritType") ?? getValue<string>(mode.NamedArguments, "InheritStr"),
+                Interfaces = (getValues<string>(mode.NamedArguments, "InterfaceTypes") ?? getValues<string>(mode.NamedArguments, "InterfaceStrs")) as string[],
+                Usings = getValues<string>(mode.NamedArguments, "Usings") as string[],
+                Namespace = getValue<string>(mode.NamedArguments, "Namespace") ?? (symbol.ContainingNamespace?.IsGlobalNamespace == true ? "AutoGenerator" : symbol.ContainingNamespace?.ToDisplayString() + ".AutoGenerator"),
+                NamespacePrefix = getValue<string>(mode.NamedArguments, "NamespacePrefix"),
+                NamespaceSuffix = getValue<string>(mode.NamedArguments, "NamespaceSuffix"),
+                IsAbstract = getValue<bool?>(mode.NamedArguments, "IsAbstract"),
+                InheritAttribute = getValue<bool?>(mode.NamedArguments, "InheritAttribute") ?? false,
+                ToNullable = getValue<bool?>(mode.NamedArguments, "ToNullable") ?? false,
+                ClassStyle = getValue<ClassStyleEnum?>(mode.NamedArguments, "ClassStyle") ?? ClassStyleEnum.Poco,
+            }).Where(mode => !string.IsNullOrWhiteSpace(mode.Id)).ToArray();
 
         var classMembers = symbol.GetMembers().Concat(symbol.AllInterfaces.SelectMany(f => f.GetMembers()))
                  .Select(member => member as IPropertySymbol)
@@ -551,7 +551,7 @@ namespace AutoCodeGenerator
                      Prefix = getValue<string>(f.NamedArguments, "Prefix"),
                      Suffix = getValue<string>(f.NamedArguments, "Suffix"),
                      Modifier = getValue<Accessibility?>(f.NamedArguments, "Modifier") ?? property.DeclaredAccessibility,
-                     Attributes = getValues<string>(f.NamedArguments, "Attributes") as string[],
+                     Attributes = getValues<string>(f.NamedArguments, "Attributes") as string[] ?? [],
                      Remarks = getValue<string>(f.NamedArguments, "Remarks"),
                      Example = getValue<string>(f.NamedArguments, "Example"),
                      SummaryPrefix = getValue<string>(f.NamedArguments, "SummaryPrefix"),
@@ -565,8 +565,19 @@ namespace AutoCodeGenerator
                      IsOverride = getValue<bool?>(f.NamedArguments, "IsOverride"),
                      IsNew = getValue<bool?>(f.NamedArguments, "IsNew"),
                      IsNullable = getValue<bool?>(f.NamedArguments, "IsNullable") ?? property.NullableAnnotation == NullableAnnotation.Annotated,
-                     InheritAttributes = property.GetAttributes().Where(ff => ff.AttributeClass?.ToDisplayString() != autoCodePropertyAttributeStr).Select(ff => getAttributeContent(ff)).ToArray()
+                     InheritAttributes = property.GetAttributes().Where(ff => !new[] { autoCodePropertyAttributeStr, customAttributeAttributeStr }.Contains(ff.AttributeClass?.ToDisplayString())).Select(ff => getAttributeContent(ff)).ToArray()
                  })).ToArray();
+
+        var classMemberAttributes = symbol.GetMembers().Concat(symbol.AllInterfaces.SelectMany(f => f.GetMembers()))
+                .Select(member => member as IPropertySymbol)
+                .Where(property => property != null)
+                .SelectMany(property => property?.GetAttributes().Where(f => f.AttributeClass?.ToDisplayString() == customAttributeAttributeStr).Select(f => new
+                {
+                    Name = getValue<string>(f.NamedArguments, "Name") ?? property.Name,
+                    Id = getValue<string>(f.NamedArguments, "Id"),
+                    Ids = getValues<string>(f.NamedArguments, "Ids") as string[],
+                    Attributes = getValues<string>(f.NamedArguments, "Attributes") as string[],
+                })).ToArray();
 
         var sourceGeneratorClassInfos = classModes.Select(f => new SourceGeneratorClassInfo
         {
@@ -597,7 +608,7 @@ namespace AutoCodeGenerator
                 //Prefix = property.Prefix,
                 //Suffix = property.Suffix,
                 Modifier = property.Modifier,
-                Attributes = property.Attributes,
+                Attributes = property.Attributes.Concat(classMemberAttributes.Where(ff => ff.Name == property.Name && (ff.Id == f.Id || (ff.Ids ?? []).Contains(f.Id))).SelectMany(ff => ff.Attributes ?? [])).ToArray(),
                 Remarks = property.Remarks,
                 Example = property.Example,
                 Summary = property.SummaryPrefix + property.Summary + property.SummarySuffix,
@@ -612,7 +623,7 @@ namespace AutoCodeGenerator
                 InheritAttributes = property.InheritAttributes,
             }).ToArray()
         })
-        .ToArray();
+                .ToArray();
 
         return (nullable: autoCodeNullable, classInfos: sourceGeneratorClassInfos);
     }

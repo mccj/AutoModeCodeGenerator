@@ -26,6 +26,7 @@ public interface Point2: eeee
 
     [AutoCodeGenerator.AutoCodeProperty(Ids = new[] { "a1", "a2" })]
     [DisplayName("sssssssssssssssss")]
+    //[AutoCodeGenerator.CustomAttribute(Ids = ["a1"], Attributes = ["dddddddddddddddddddddddddddddddddd"])]
     public long? ProjectId { get; set; }
 }
 public interface eeee: eeee1
