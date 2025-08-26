@@ -53,18 +53,18 @@ public static class SourceGeneratorHelper
                 //if (classInfo.ClassStyle == ClassStyleEnum.Inpc && true) throw new Exception("类型样式 Inpc 必须继承 AutoCodeGenerator.InpcPropertyBindableBaseAbstract");
 
                 sourceBuilder.AppendLine($"\t/// <summary>");
-                sourceBuilder.AppendLine($"\t/// " + classInfo.Summary);
+                sourceBuilder.AppendLine($"\t/// " + getSummary(classInfo.Summary, "\t/// "));
                 sourceBuilder.AppendLine($"\t/// </summary>");
                 if (!string.IsNullOrWhiteSpace(classInfo.Example))
                 {
                     sourceBuilder.AppendLine($"\t/// <example>");
-                    sourceBuilder.AppendLine($"\t/// " + classInfo.Example);
+                    sourceBuilder.AppendLine($"\t/// " + getSummary(classInfo.Example, "\t/// "));
                     sourceBuilder.AppendLine($"\t/// </example>");
                 }
                 if (!string.IsNullOrWhiteSpace(classInfo.Remarks))
                 {
                     sourceBuilder.AppendLine($"\t/// <remarks>");
-                    sourceBuilder.AppendLine($"\t/// " + classInfo.Remarks);
+                    sourceBuilder.AppendLine($"\t/// " + getSummary(classInfo.Remarks, "\t/// "));
                     sourceBuilder.AppendLine($"\t/// </remarks>");
                 }
                 var strClassAttributes = string.Join("\r\n", classInfo.Attributes?.Where(f => !string.IsNullOrWhiteSpace(f))?.Select(f => "\t[" + f + "]") ?? new string[] { });
@@ -85,18 +85,18 @@ public static class SourceGeneratorHelper
                 {
                     if (new[] { item.IsVirtual, item.IsOverride, item.IsNew }.Where(f => f == true).Count() > 1) throw new Exception($"类型 {classInfo.Name} 属性 {item.Name} 的 AutoCodePropertyAttribute 特性中 IsVirtual、IsOverride、IsNew 只能一个为 true");
                     sourceBuilder.AppendLine($"\t\t/// <summary>");
-                    sourceBuilder.AppendLine($"\t\t/// " + item.Summary);
+                    sourceBuilder.AppendLine($"\t\t/// " + getSummary(item.Summary, "\t\t/// "));
                     sourceBuilder.AppendLine($"\t\t/// </summary>");
                     if (!string.IsNullOrWhiteSpace(item.Example))
                     {
                         sourceBuilder.AppendLine($"\t\t/// <example>");
-                        sourceBuilder.AppendLine($"\t\t/// " + item.Example);
+                        sourceBuilder.AppendLine($"\t\t/// " + getSummary(item.Example, "\t\t/// "));
                         sourceBuilder.AppendLine($"\t\t/// </example>");
                     }
                     if (!string.IsNullOrWhiteSpace(item.Remarks))
                     {
                         sourceBuilder.AppendLine($"\t\t/// <remarks>");
-                        sourceBuilder.AppendLine($"\t\t/// " + item.Remarks);
+                        sourceBuilder.AppendLine($"\t\t/// " + getSummary(item.Remarks, "\t\t/// "));
                         sourceBuilder.AppendLine($"\t\t/// </remarks>");
                     }
                     var strPropertyAttributes = string.Join("\r\n", ((item.Attributes ?? []).Concat((classInfo.InheritAttribute ? item.InheritAttributes : null) ?? []))?.Where(f => !string.IsNullOrWhiteSpace(f))?.Select(f => "\t\t[" + f + "]") ?? new string[] { });
@@ -150,5 +150,9 @@ public static class SourceGeneratorHelper
             return str; // 如果字符串为空或只有一个字符，直接返回原字符串
         }
         return char.ToLower(str[0]) + str.Substring(1); // 将首字母转为小写并连接剩余部分
+    }
+    private static string? getSummary(string? summary, string? sss = null)
+    {
+        return string.Join("\r\n" + (sss ?? "/// "), summary?.Split(new[] { "\r", "\n" }, StringSplitOptions.RemoveEmptyEntries).Select(f => f?.Trim()));
     }
 }

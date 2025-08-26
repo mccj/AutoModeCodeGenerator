@@ -10,12 +10,19 @@ public interface Point1
     [AutoCodeGenerator.AutoCodeProperty(Ids = new[] { "a1", "a2" })]
     public double Xxxxx { get; set; }
 }
-
+/// <summary>
+/// aaaa
+/// bbbbbbb
+/// </summary>
 [AutoCodeGenerator.AutoCodeNullable(Type = AutoCodeGenerator.NullableEnum.Enable)]
 [AutoCodeGenerator.AutoCodeClassModes(Id = "a1", Namespace = "bbb", Suffix = "ccc", Summary = "eeeeeeeeeeeeeeeeee", Modifier = AutoCodeGenerator.AccessibilityEnum.Internal)]
 [AutoCodeGenerator.AutoCodeClassModes(Id = "a2", Namespace = "ccc", InheritAttribute = true)]
 public interface Point2: eeee
 {
+    /// <summary>
+    /// dddddddd
+    /// ffffffffff
+    /// </summary>
     [AutoCodeGenerator.AutoCodeProperty(Id = "a1")]
     [AutoCodeGenerator.AutoCodeProperty(Id = "a2")]
     double Y { get; set; }
