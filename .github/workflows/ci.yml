@@ -1,27 +1,46 @@
+# =============================================================================
+# CI — 持续集成（构建与测试）
+# =============================================================================
+# 用途：在合并前/合并后验证代码能否正常编译并通过单元测试。
+# 不负责：打包 NuGet、发布到 NuGet.org（见 release.yml）。
+# =============================================================================
+
 name: CI
 
+# -----------------------------------------------------------------------------
+# 触发条件
+# -----------------------------------------------------------------------------
 on:
+  # 推送到主分支时运行（含直接 push 与 PR 合并后的 push）
   push:
     branches: [main, master]
+  # 针对 main/master 的 Pull Request 时运行（PR 未合并也会跑，用于门禁检查）
   pull_request:
     branches: [main, master]
 
 jobs:
   build:
+    # 使用 GitHub 托管的 Ubuntu 最新镜像；本项目为 netstandard2.0 分析器，无需 Windows/VS
     runs-on: ubuntu-latest
+
     steps:
+      # 检出当前触发事件对应的 commit（PR 时为 PR 的 merge ref）
       - uses: actions/checkout@v4
 
+      # 安装 .NET SDK 8.x（与 PACKAGING.md 前置条件一致）
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 8.0.x
 
+      # 还原解决方案依赖
       - name: Restore
         run: dotnet restore src/AutoModeCodeGenerator.slnx
 
+      # Debug 配置编译（默认 Configuration）；--no-restore 复用上一步还原结果
       - name: Build
         run: dotnet build src/AutoModeCodeGenerator.slnx --no-restore
 
+      # 运行全部测试项目；--no-build 复用编译产物
       - name: Test
         run: dotnet test src/AutoModeCodeGenerator.slnx --no-build --verbosity normal

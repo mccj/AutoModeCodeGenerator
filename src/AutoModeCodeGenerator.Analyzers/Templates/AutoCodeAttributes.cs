@@ -9,7 +9,7 @@ namespace AutoCodeGenerator
     [AttributeUsage(AttributeTargets.Interface | AttributeTargets.Class | AttributeTargets.Property, AllowMultiple = true)]
     public abstract class AutoCodeClassBaseAttribute : Attribute
     {
-        /// <summary>关联的模式 Id，与 <see cref="AutoCodePropertyAttribute.Id"/> / <see cref="AutoCodePropertyAttribute.Ids"/> 对应。</summary>
+        /// <summary>关联的模式 Id，与 <see cref="AutoCodePropertyAttribute.Ids"/> 对应。</summary>
         public string? Id { get; set; }
         /// <summary>生成成员的名称；未指定时使用源类型或源属性名。</summary>
         public string? Name { get; set; }
