@@ -1,28 +1,45 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
+	<!--
+		NuGet 包：AutoModeCodeGenerator.Analyzers
+		- 版本号：下方 <Version>（发布前同步本目录 README 安装示例）
+		- 包描述与标签：NugetPackage.props
+		- 消费方使用文档：README.md（打包进 NuGet）
+		- 发包流程：PACKAGING.md
+	-->
 
 	<PropertyGroup>
 		<TargetFramework>netstandard2.0</TargetFramework>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
 		<LangVersion>12.0</LangVersion>
-		<Version>1.0.0.6</Version>
+		<!-- 每次发布递增；与 README / PACKAGING.md 中的示例保持一致 -->
+		<Version>1.0.0.18</Version>
 	</PropertyGroup>
 
 	<Import Project="CodeAnalyzers.props" />
 	<Import Project="NugetPackage.props" />
 
 	<ItemGroup>
-		<Compile Remove="OutputCodes\**" />
-		<Compile Remove="test\**" />
-		<EmbeddedResource Remove="OutputCodes\**" />
-		<EmbeddedResource Remove="test\**" />
-		<None Remove="OutputCodes\**" />
-		<None Remove="test\**" />
+		<Compile Remove="Templates\**" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<EmbeddedResource Include="Templates\AutoCodeAttributes.cs" LogicalName="AutoModeCodeGenerator.Analyzers.Templates.AutoCodeAttributes.cs" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<AdditionalFiles Include="AnalyzerReleases.Shipped.md" />
+		<AdditionalFiles Include="AnalyzerReleases.Unshipped.md" />
 	</ItemGroup>
 
 	<ItemGroup>
 		<PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.8.0" PrivateAssets="all" />
 		<PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="3.3.4" PrivateAssets="all" />
+		<PackageReference Include="System.Text.Json" Version="8.0.5" PrivateAssets="all" GeneratePathProperty="true" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<InternalsVisibleTo Include="AutoModeCodeGenerator.Tests" />
 	</ItemGroup>
 	
 </Project>

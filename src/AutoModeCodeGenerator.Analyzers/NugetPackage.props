@@ -1,14 +1,29 @@
 <Project>
 	<PropertyGroup>
 		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-		<PackageProjectUrl>https://github.com/mccj/AutoModeCodeGenerator.git</PackageProjectUrl>
+		<SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
+
+		<!-- NuGet 包标识与展示信息（发包流程见 PACKAGING.md） -->
+		<PackageId>AutoModeCodeGenerator.Analyzers</PackageId>
+		<Authors>mccj</Authors>
+		<Title>AutoModeCodeGenerator Analyzers</Title>
+		<Description>基于 Roslyn 的 C# 增量源生成器：通过特性在接口或类上声明规则，编译期自动生成 POCO、Record、INPC 等实现类；亦支持从 .entity.json 批量生成。Roslyn incremental source generator for compile-time POCO/Record/INPC class generation from attributes or entity JSON files.</Description>
+		<PackageTags>roslyn;source-generator;analyzer;code-generation;poco;record;inpc;incremental-generator;csharp</PackageTags>
+		<PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+		<PackageProjectUrl>https://github.com/mccj/AutoModeCodeGenerator</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/mccj/AutoModeCodeGenerator.git</RepositoryUrl>
+		<RepositoryType>git</RepositoryType>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
 	</PropertyGroup>
 	
 	<ItemGroup>
-		<None Include="..\..\README.md">
+		<None Include="README.md">
 			<Pack>True</Pack>
 			<PackagePath>\</PackagePath>
+		</None>
+		<None Include="EntityFiles\entity.schema.json">
+			<Pack>True</Pack>
+			<PackagePath>content\entity.schema.json</PackagePath>
 		</None>
 	</ItemGroup>
 </Project>

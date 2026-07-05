@@ -1,4 +1,12 @@
 ﻿{
-    "aa": "aa",
-    "bb": "bb"
+  "$schema": "../AutoModeCodeGenerator.Analyzers/EntityFiles/entity.schema.json",
+  "namespace": "Samples.Entities",
+  "className": "TestModel",
+  "classStyle": "Poco",
+  "nullable": "enable",
+  "summary": "Entity generated from TestModel.entity.json",
+  "properties": [
+    { "name": "Aa", "type": "string", "summary": "Field aa" },
+    { "name": "Bb", "type": "string", "summary": "Field bb", "isNullable": true }
+  ]
 }

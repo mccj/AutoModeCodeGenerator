@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/mccj/AutoModeCodeGenerator/entity.schema.json",
+  "title": "AutoModeCodeGenerator entity.json",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "namespace": { "type": "string" },
+    "className": { "type": "string" },
+    "nullable": {
+      "type": "string",
+      "enum": [
+        "enable",
+        "disable",
+        "restore",
+        "enable warnings",
+        "disable warnings",
+        "restore warnings",
+        "enable annotations",
+        "disable annotations",
+        "restore annotations"
+      ]
+    },
+    "classStyle": { "type": "string", "enum": ["Poco", "Record", "Inpc", "poco", "record", "inpc"] },
+    "modifier": {
+      "type": "string",
+      "enum": ["public", "internal", "protected", "private", "protected internal", "private protected"]
+    },
+    "isAbstract": { "type": "boolean" },
+    "isPartial": { "type": "boolean" },
+    "prefix": { "type": "string" },
+    "suffix": { "type": "string" },
+    "summary": { "type": "string" },
+    "remarks": { "type": "string" },
+    "example": { "type": "string" },
+    "inherit": { "type": "string" },
+    "inheritAttribute": { "type": "boolean" },
+    "toNullable": { "type": "boolean" },
+    "usings": { "type": "array", "items": { "type": "string" } },
+    "interfaces": { "type": "array", "items": { "type": "string" } },
+    "attributes": { "type": "array", "items": { "type": "string" } },
+    "properties": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/property" }
+    }
+  },
+  "$defs": {
+    "property": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "type"],
+      "properties": {
+        "name": { "type": "string" },
+        "type": { "type": "string" },
+        "prefix": { "type": "string" },
+        "suffix": { "type": "string" },
+        "modifier": {
+          "type": "string",
+          "enum": ["public", "internal", "protected", "private", "protected internal", "private protected"]
+        },
+        "isNullable": { "type": "boolean" },
+        "isVirtual": { "type": "boolean" },
+        "isOverride": { "type": "boolean" },
+        "isNew": { "type": "boolean" },
+        "defaultValue": { "type": "string" },
+        "summary": { "type": "string" },
+        "remarks": { "type": "string" },
+        "example": { "type": "string" },
+        "attributes": { "type": "array", "items": { "type": "string" } },
+        "inheritAttributes": { "type": "array", "items": { "type": "string" } }
+      }
+    }
+  }
+}

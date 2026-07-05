@@ -17,7 +17,7 @@ public interface Point1
 [AutoCodeGenerator.AutoCodeNullable(Type = AutoCodeGenerator.NullableEnum.Enable)]
 [AutoCodeGenerator.AutoCodeClassModes(Id = "a1", Namespace = "bbb", Suffix = "ccc", Summary = "eeeeeeeeeeeeeeeeee", Modifier = AutoCodeGenerator.AccessibilityEnum.Internal)]
 [AutoCodeGenerator.AutoCodeClassModes(Id = "a2", Namespace = "ccc", InheritAttribute = true)]
-public interface Point2: eeee
+public interface Point2: IEntityMetadata
 {
     /// <summary>
     /// dddddddd
@@ -33,15 +33,15 @@ public interface Point2: eeee
 
     [AutoCodeGenerator.AutoCodeProperty(Ids = new[] { "a1", "a2" })]
     [DisplayName("sssssssssssssssss")]
-    //[AutoCodeGenerator.CustomAttribute(Ids = ["a1"], Attributes = ["dddddddddddddddddddddddddddddddddd"])]
+    //[AutoCodeGenerator.CustomAttributeAttribute(Ids = ["a1"], Attributes = ["dddddddddddddddddddddddddddddddddd"])]
     public long? ProjectId { get; set; }
 }
-public interface eeee: eeee1
+public interface IEntityMetadata : IEntityBase
 {
 
 }
-//[AutoCodeGenerator.CustomAttribute(Ids = ["a2"], Attributes = ["dddddddddddddddddddddddddddddddddd"])]
-public interface eeee1
+//[AutoCodeGenerator.CustomAttributeAttribute(Ids = ["a2"], Attributes = ["dddddddddddddddddddddddddddddddddd"])]
+public interface IEntityBase
 {
     [AutoCodeGenerator.AutoCodeProperty(Id = "a1")]
     [AutoCodeGenerator.AutoCodeProperty(Id = "a2")]
