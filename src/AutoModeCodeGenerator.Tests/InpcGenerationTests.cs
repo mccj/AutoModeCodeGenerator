@@ -26,7 +26,10 @@ public class InpcGenerationTests
         Assert.Contains(
             "public partial class ICounter : global::AutoCodeGenerator.InpcPropertyBindableBaseAbstract",
             generated);
-        Assert.Contains("RaisePropertyChanged()", generated);
         Assert.Contains("SetValue(value)", generated);
+
+        var attributeSource = SourceGeneratorTestHelper.GetGeneratedSource(result, "AutoCodeAttribute.g.cs");
+        Assert.Contains("INotifyPropertyChanged", attributeSource);
+        Assert.Contains("PropertyChanged", attributeSource);
     }
 }

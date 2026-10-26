@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 	<!--
 		NuGet 包：AutoModeCodeGenerator.Analyzers
 		- 版本号：下方 <Version>（发布前同步本目录 README 安装示例）
@@ -11,15 +11,16 @@
 		<TargetFramework>netstandard2.0</TargetFramework>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
-		<LangVersion>12.0</LangVersion>
+		<LangVersion>14.0</LangVersion>
 		<!-- 每次发布递增；与 README / PACKAGING.md 中的示例保持一致 -->
-		<Version>1.0.0.18</Version>
+		<Version>1.0.1.0</Version>
 	</PropertyGroup>
 
 	<Import Project="CodeAnalyzers.props" />
 	<Import Project="NugetPackage.props" />
 
 	<ItemGroup>
+		<!-- Templates/ 仅含给消费方注入的源，不编进分析器程序集 -->
 		<Compile Remove="Templates\**" />
 	</ItemGroup>
 
@@ -34,8 +35,17 @@
 
 	<ItemGroup>
 		<PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.8.0" PrivateAssets="all" />
+		<PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.8.0" PrivateAssets="all" />
 		<PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="3.3.4" PrivateAssets="all" />
+		<!-- System.Text.Json + 显式传递依赖，GeneratePathProperty 供 CodeAnalyzers.props 打入 analyzers/dotnet/cs -->
 		<PackageReference Include="System.Text.Json" Version="8.0.5" PrivateAssets="all" GeneratePathProperty="true" />
+		<PackageReference Include="System.Text.Encodings.Web" Version="8.0.0" PrivateAssets="all" GeneratePathProperty="true" />
+		<PackageReference Include="System.IO.Pipelines" Version="8.0.0" PrivateAssets="all" GeneratePathProperty="true" />
+		<PackageReference Include="System.Memory" Version="4.5.5" PrivateAssets="all" GeneratePathProperty="true" />
+		<PackageReference Include="System.Buffers" Version="4.5.1" PrivateAssets="all" GeneratePathProperty="true" />
+		<PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="6.0.0" PrivateAssets="all" GeneratePathProperty="true" />
+		<PackageReference Include="System.Threading.Tasks.Extensions" Version="4.5.4" PrivateAssets="all" GeneratePathProperty="true" />
+		<PackageReference Include="System.Numerics.Vectors" Version="4.5.0" PrivateAssets="all" GeneratePathProperty="true" />
 	</ItemGroup>
 
 	<ItemGroup>

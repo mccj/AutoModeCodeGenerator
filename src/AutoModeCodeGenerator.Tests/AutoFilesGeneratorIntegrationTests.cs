@@ -63,4 +63,28 @@ public class AutoFilesGeneratorIntegrationTests
         var generated = SourceGeneratorTestHelper.GetGeneratedSource(result, "Conflict.entity.g.cs");
         Assert.DoesNotContain("Title", generated);
     }
+
+    [Fact]
+    public void Skips_entity_generation_when_msbuild_property_disabled()
+    {
+        const string entityJson = """
+            {
+              "namespace": "App.Entities",
+              "className": "Skipped",
+              "properties": [
+                { "name": "Code", "type": "string" }
+              ]
+            }
+            """;
+
+        var result = SourceGeneratorTestHelper.RunEntityFilesGenerator(
+            "Skipped.entity.json",
+            entityJson,
+            analyzerConfigOptions: new Dictionary<string, string>
+            {
+                ["build_property.AutoModeGenerateEntityFiles"] = "false",
+            });
+
+        Assert.DoesNotContain(result.GeneratedSources, s => s.HintName.Contains("Skipped", StringComparison.Ordinal));
+    }
 }

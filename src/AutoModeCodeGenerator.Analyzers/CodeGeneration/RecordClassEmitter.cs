@@ -1,8 +1,9 @@
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace 自动代码生成.CodeGeneration;
+namespace AutoModeCodeGenerator.Internal.CodeGeneration;
 
+/// <summary>ClassStyle.Record：主构造参数 + 可选属性体；特性与 entity.json 均可选用。</summary>
 internal sealed class RecordClassEmitter : ClassStyleEmitterBase
 {
     public override ClassStyleEnum Style => ClassStyleEnum.Record;
@@ -44,7 +45,8 @@ internal sealed class RecordClassEmitter : ClassStyleEmitterBase
             classInfo,
             property,
             includeSetter: false,
-            initializerText: null);
+            initializerText: null,
+            useInitSetter: true);
 
     protected override string? GetStyleDefaultInitializer(
         string propertyType,

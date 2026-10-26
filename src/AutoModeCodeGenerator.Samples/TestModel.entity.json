@@ -1,4 +1,4 @@
-﻿{
+{
   "$schema": "../AutoModeCodeGenerator.Analyzers/EntityFiles/entity.schema.json",
   "namespace": "Samples.Entities",
   "className": "TestModel",
@@ -10,3 +10,4 @@
     { "name": "Bb", "type": "string", "summary": "Field bb", "isNullable": true }
   ]
 }
+

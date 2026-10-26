@@ -2,8 +2,9 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace 自动代码生成.CodeGeneration;
+namespace AutoModeCodeGenerator.Internal.CodeGeneration;
 
+/// <summary>ClassStyle.Inpc：INotifyPropertyChanged 字段式属性；特性与 entity.json 均可选用。</summary>
 internal sealed class InpcClassEmitter : ClassStyleEmitterBase
 {
     public override ClassStyleEnum Style => ClassStyleEnum.Inpc;
@@ -20,13 +21,13 @@ internal sealed class InpcClassEmitter : ClassStyleEmitterBase
         var getAccessor = SyntaxFactory.AccessorDeclaration(SyntaxKind.GetAccessorDeclaration)
             .WithBody(SyntaxFactory.Block(SyntaxFactory.ReturnStatement(getValueExpression)));
 
+        // SetValue 内部比较并触发 PropertyChanged，此处不再重复 RaisePropertyChanged。
         var setAccessor = SyntaxFactory.AccessorDeclaration(SyntaxKind.SetAccessorDeclaration)
             .WithBody(SyntaxFactory.Block(
                 SyntaxFactory.IfStatement(
                     compareExpression,
                     SyntaxFactory.Block(
-                        SyntaxFactory.ExpressionStatement(SyntaxFactory.ParseExpression("SetValue(value)")),
-                        SyntaxFactory.ExpressionStatement(SyntaxFactory.ParseExpression("RaisePropertyChanged()"))))));
+                        SyntaxFactory.ExpressionStatement(SyntaxFactory.ParseExpression("SetValue(value)"))))));
 
         var declaration = SyntaxFactory.PropertyDeclaration(typeSyntax, property.Name!)
             .WithModifiers(SyntaxGenerationHelpers.CreatePropertyModifiers(property))

@@ -11,5 +11,14 @@
 	<ItemGroup>
 		<!-- 将 DLL 打包到 NuGet 的 analyzers/dotnet/cs 目录，而非 lib -->
 		<None Include="$(OutputPath)\$(AssemblyName).dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
+		<!-- System.Text.Json 及其 netstandard2.0 传递依赖（供 AutoFilesGenerator 在消费端加载） -->
+		<None Include="$(PkgSystem_Text_Json)\lib\netstandard2.0\System.Text.Json.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" Condition="'$(PkgSystem_Text_Json)' != ''" />
+		<None Include="$(PkgSystem_Text_Encodings_Web)\lib\netstandard2.0\System.Text.Encodings.Web.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" Condition="'$(PkgSystem_Text_Encodings_Web)' != ''" />
+		<None Include="$(PkgSystem_IO_Pipelines)\lib\netstandard2.0\System.IO.Pipelines.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" Condition="'$(PkgSystem_IO_Pipelines)' != ''" />
+		<None Include="$(PkgSystem_Memory)\lib\netstandard2.0\System.Memory.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" Condition="'$(PkgSystem_Memory)' != ''" />
+		<None Include="$(PkgSystem_Buffers)\lib\netstandard2.0\System.Buffers.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" Condition="'$(PkgSystem_Buffers)' != ''" />
+		<None Include="$(PkgSystem_Runtime_CompilerServices_Unsafe)\lib\netstandard2.0\System.Runtime.CompilerServices.Unsafe.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" Condition="'$(PkgSystem_Runtime_CompilerServices_Unsafe)' != ''" />
+		<None Include="$(PkgSystem_Threading_Tasks_Extensions)\lib\netstandard2.0\System.Threading.Tasks.Extensions.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" Condition="'$(PkgSystem_Threading_Tasks_Extensions)' != ''" />
+		<None Include="$(PkgSystem_Numerics_Vectors)\lib\netstandard2.0\System.Numerics.Vectors.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" Condition="'$(PkgSystem_Numerics_Vectors)' != ''" />
 	</ItemGroup>
 </Project>

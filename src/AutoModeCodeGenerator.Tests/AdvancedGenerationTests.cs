@@ -186,8 +186,9 @@ public class AdvancedGenerationTests
         var result = SourceGeneratorTestHelper.RunGenerator(source);
         var generated = SourceGeneratorTestHelper.GetGeneratedSource(result, "IAxis.g.cs");
 
+        Assert.Contains("record class IAxis", generated);
         Assert.Contains("public IAxis(double @x)", generated);
-        Assert.Contains("public double X { get; }", generated);
+        Assert.Contains("public double X { get; init; }", generated);
     }
 
     [Fact]

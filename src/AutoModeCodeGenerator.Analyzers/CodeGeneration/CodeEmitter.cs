@@ -5,8 +5,11 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace 自动代码生成.CodeGeneration;
+namespace AutoModeCodeGenerator.Internal.CodeGeneration;
 
+/// <summary>
+/// 将 <see cref="SourceGeneratorClassInfo"/> 列表编译为单个源文件文本，按 ClassStyle 选择发射器。
+/// </summary>
 internal static class CodeEmitter
 {
     private static readonly IClassStyleEmitter[] StyleEmitters =
@@ -39,7 +42,7 @@ internal static class CodeEmitter
         foreach (var namespaceGroup in classInfos.GroupBy(classInfo => classInfo.ClassNamespace ?? string.Empty).OrderBy(group => group.Key))
         {
             var classDeclarations = namespaceGroup
-                .Select(classInfo => GetEmitter(classInfo.ClassStyle).CreateClassDeclaration(classInfo))
+                .Select(classInfo => GetEmitter(classInfo.ClassStyle).CreateTypeDeclaration(classInfo))
                 .Cast<MemberDeclarationSyntax>()
                 .ToArray();
 

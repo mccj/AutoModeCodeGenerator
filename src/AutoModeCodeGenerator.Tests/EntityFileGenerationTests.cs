@@ -1,7 +1,7 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 
-using 自动代码生成.EntityFiles;
+using AutoModeCodeGenerator.Internal.EntityFiles;
 
 namespace AutoModeCodeGenerator.Tests;
 
@@ -83,9 +83,10 @@ public class EntityFileGenerationTests
 
         var generated = SourceGeneratorTestHelper.GenerateFromEntityJson("Point.entity.json", entityJson);
 
+        Assert.Contains("record class Point", generated);
         Assert.Contains("public Point(double @x", generated);
-        Assert.Contains("public double X { get; }", generated);
-        Assert.Contains("public double Y { get; }", generated);
+        Assert.Contains("public double X { get; init; }", generated);
+        Assert.Contains("public double Y { get; init; }", generated);
         SourceGeneratorTestHelper.AssertEntityJsonCompiles("Point.entity.json", entityJson);
     }
 
@@ -108,7 +109,7 @@ public class EntityFileGenerationTests
         Assert.Contains(
             "public partial class CounterVm : global::AutoCodeGenerator.InpcPropertyBindableBaseAbstract",
             generated);
-        Assert.Contains("RaisePropertyChanged()", generated);
+        Assert.Contains("SetValue(value)", generated);
         SourceGeneratorTestHelper.AssertEntityJsonCompiles("CounterVm.entity.json", entityJson);
     }
 

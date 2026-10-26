@@ -1,8 +1,15 @@
-﻿using Samples.Entities;
+﻿using Samples.CrudCookbook.AutoGenerator;
+using Samples.Entities;
 using bbb;
 
 Console.WriteLine("AutoModeCodeGenerator Samples");
 Console.WriteLine("-----------------------------");
+
+// 生产主路径：CRUD 六模式（见 CrudCookbook/）
+var product = new ProductRecord { Id = 1, Name = "widget", CategoryId = 10 };
+var search = new ProductSearchInput { Name = "wid", CategoryId = 10 };
+Console.WriteLine($"CRUD    ProductRecord: Id={product.Id}, Name={product.Name}, CategoryId={product.CategoryId}");
+Console.WriteLine($"CRUD    ProductSearchInput.Name={search.Name}");
 
 var recordPoint = new Point1ccc(3.14);
 Console.WriteLine($"Record  Point1ccc.Xxxxx = {recordPoint.Xxxxx}");

@@ -7,7 +7,7 @@
 		<PackageId>AutoModeCodeGenerator.Analyzers</PackageId>
 		<Authors>mccj</Authors>
 		<Title>AutoModeCodeGenerator Analyzers</Title>
-		<Description>基于 Roslyn 的 C# 增量源生成器：通过特性在接口或类上声明规则，编译期自动生成 POCO、Record、INPC 等实现类；亦支持从 .entity.json 批量生成。Roslyn incremental source generator for compile-time POCO/Record/INPC class generation from attributes or entity JSON files.</Description>
+		<Description>基于 Roslyn 的 C# 增量源生成器：特性驱动 CRUD 多产物，或从 .entity.json 声明式生成 POCO/Record/INPC。Roslyn incremental source generator: attribute-driven CRUD multi-output types and/or .entity.json declarative generation.</Description>
 		<PackageTags>roslyn;source-generator;analyzer;code-generation;poco;record;inpc;incremental-generator;csharp</PackageTags>
 		<PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
 		<PackageProjectUrl>https://github.com/mccj/AutoModeCodeGenerator</PackageProjectUrl>
@@ -24,6 +24,10 @@
 		<None Include="EntityFiles\entity.schema.json">
 			<Pack>True</Pack>
 			<PackagePath>content\entity.schema.json</PackagePath>
+		</None>
+		<None Include="build\AutoModeCodeGenerator.Analyzers.props">
+			<Pack>True</Pack>
+			<PackagePath>build\</PackagePath>
 		</None>
 	</ItemGroup>
 </Project>

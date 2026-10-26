@@ -1,6 +1,6 @@
-using System.Text;
+﻿using System.Text;
 
-namespace 自动代码生成;
+namespace AutoModeCodeGenerator.Internal;
 
 /// <summary>
 /// 读取打包在程序集中的嵌入模板（特性定义等），使用 UTF-8 解码以避免中文乱码。

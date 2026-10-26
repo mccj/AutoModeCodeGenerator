@@ -1,7 +1,10 @@
-using System.Collections.Immutable;
+﻿using System.Collections.Immutable;
 
-namespace 自动代码生成;
+namespace AutoModeCodeGenerator.Internal;
 
+/// <summary>
+/// 生成文件头与 Emit 入口。具体语法由 <see cref="CodeGeneration.CodeEmitter"/> 按 ClassStyle 分发。
+/// </summary>
 public static class SourceGeneratorHelper
 {
 #pragma warning disable RS1035 // 不要使用禁用于分析器的 API

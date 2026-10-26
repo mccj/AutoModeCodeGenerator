@@ -1,8 +1,11 @@
-using Microsoft.CodeAnalysis;
+﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Text;
 
-namespace 自动代码生成.EntityFiles;
+namespace AutoModeCodeGenerator.Internal.EntityFiles;
 
+/// <summary>
+/// 为 entity.json 诊断构造基于文件路径 / 行列的 <see cref="Location"/>。
+/// </summary>
 internal static class EntityFileLocations
 {
     public static Location Create(string filePath, SourceText sourceText, int line, int column)

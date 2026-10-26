@@ -25,11 +25,12 @@ public class RecordGenerationTests
         var result = SourceGeneratorTestHelper.RunGenerator(source);
         var generated = SourceGeneratorTestHelper.GetGeneratedSource(result, "IPoint.g.cs");
 
+        Assert.Contains("record class IPoint", generated);
         Assert.Contains("public IPoint(double @xCoord", generated);
         Assert.Contains("double @yCoord)", generated);
         Assert.Contains("this.XCoord = @xCoord;", generated);
         Assert.Contains("this.YCoord = @yCoord;", generated);
-        Assert.Contains("public double XCoord { get; }", generated);
-        Assert.Contains("public double YCoord { get; }", generated);
+        Assert.Contains("public double XCoord { get; init; }", generated);
+        Assert.Contains("public double YCoord { get; init; }", generated);
     }
 }

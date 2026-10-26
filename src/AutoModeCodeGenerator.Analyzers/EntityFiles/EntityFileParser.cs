@@ -4,8 +4,11 @@ using System.Text.Json;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Text;
 
-namespace 自动代码生成.EntityFiles;
+namespace AutoModeCodeGenerator.Internal.EntityFiles;
 
+/// <summary>
+/// entity.json 主路径：将 JSON 解析为 <see cref="SourceGeneratorClassInfo"/>，供共享 Emit 使用。
+/// </summary>
 internal static class EntityFileParser
 {
     private static readonly JsonSerializerOptions JsonOptions = new()
@@ -43,82 +46,211 @@ internal static class EntityFileParser
         EntityFileDefinition definition,
         SourceText? sourceText = null)
     {
-        var baseClassName = definition.ClassName ?? GetDefaultClassName(filePath);
-        var className = (definition.Prefix ?? string.Empty) + baseClassName + (definition.Suffix ?? string.Empty);
-        var nullable = ParseNullable(definition.Nullable);
-        var classStyle = ParseClassStyle(definition.ClassStyle);
-        var inherit = definition.Inherit ?? (classStyle == ClassStyleEnum.Inpc
-            ? "global::AutoCodeGenerator.InpcPropertyBindableBaseAbstract"
-            : null);
+        var fileName = Path.GetFileName(filePath);
+        var defaultClassName = GetDefaultClassName(filePath);
         var diagnostics = ImmutableArray.CreateBuilder<Diagnostic>();
-        var properties = ImmutableArray.CreateBuilder<SourceGeneratorPropertyInfo>();
+        var classInfos = ImmutableArray.CreateBuilder<SourceGeneratorClassInfo>();
+
+        var modes = definition.Modes is { Length: > 0 }
+            ? definition.Modes
+            : [CreateRootMode(definition)];
+
+        var validModes = new List<(EntityModeDefinition Mode, string ResolvedId)>();
+        foreach (var mode in modes)
+        {
+            if (definition.Modes is { Length: > 0 } && string.IsNullOrWhiteSpace(mode.Id))
+            {
+                diagnostics.Add(GeneratorDiagnostics.Create(
+                    GeneratorDiagnostics.MissingClassModeId,
+                    sourceText is null ? Location.None : EntityFileLocations.Create(filePath, sourceText, 0, 0),
+                    fileName));
+                continue;
+            }
+
+            validModes.Add((mode, mode.Id ?? "default"));
+        }
+
+        var modeIds = new HashSet<string>(validModes.Select(m => m.ResolvedId), StringComparer.Ordinal);
 
         foreach (var property in definition.Properties ?? [])
         {
             if (string.IsNullOrWhiteSpace(property.Name) || string.IsNullOrWhiteSpace(property.Type))
-                continue;
-
-            var propertyName = (property.Prefix ?? string.Empty) + property.Name + (property.Suffix ?? string.Empty);
-            if (CountTrue(property.IsVirtual, property.IsOverride, property.IsNew) > 1)
             {
-                var location = sourceText is null
-                    ? Location.None
-                    : EntityFileLocations.TryFindPropertyName(filePath, sourceText, property.Name!);
                 diagnostics.Add(GeneratorDiagnostics.Create(
-                    GeneratorDiagnostics.InvalidPropertyModifier,
-                    location,
-                    className,
-                    propertyName));
+                    GeneratorDiagnostics.EntityPropertyMissingFields,
+                    sourceText is null ? Location.None : EntityFileLocations.Create(filePath, sourceText, 0, 0),
+                    fileName));
                 continue;
             }
 
-            properties.Add(new SourceGeneratorPropertyInfo(
-                Name: propertyName,
-                Modifier: ParseAccessibility(property.Modifier),
-                Summary: property.Summary ?? property.Name,
-                Remarks: property.Remarks,
-                Example: property.Example,
-                IsVirtual: property.IsVirtual,
-                IsOverride: property.IsOverride,
-                IsNew: property.IsNew,
-                Type: property.Type,
-                DefaultValue: property.DefaultValue,
-                IsNullable: property.IsNullable,
-                Attributes: ImmutableArray.CreateRange(
-                    (property.Attributes ?? [])
-                    .Where(attribute => !string.IsNullOrWhiteSpace(attribute))),
-                InheritAttributes: ImmutableArray.CreateRange(
-                    (property.InheritAttributes ?? [])
-                    .Where(attribute => !string.IsNullOrWhiteSpace(attribute)))));
+            foreach (var modeId in GetPropertyModeIds(property, hasExplicitModes: definition.Modes is { Length: > 0 }))
+            {
+                if (modeIds.Contains(modeId))
+                    continue;
+
+                diagnostics.Add(GeneratorDiagnostics.Create(
+                    GeneratorDiagnostics.UnboundPropertyMode,
+                    sourceText is null
+                        ? Location.None
+                        : EntityFileLocations.TryFindPropertyName(filePath, sourceText, property.Name!),
+                    fileName,
+                    property.Name!,
+                    modeId));
+            }
         }
 
-        var classInfo = new SourceGeneratorClassInfo(
-            Name: className,
-            Modifier: ParseAccessibility(definition.Modifier),
-            Summary: definition.Summary ?? baseClassName,
-            Remarks: definition.Remarks,
-            Example: definition.Example,
-            ClassNamespace: definition.Namespace ?? "Generated.Entities",
-            Usings: ImmutableArray.CreateRange(definition.Usings ?? []),
-            Interfaces: ImmutableArray.CreateRange(
-                (definition.Interfaces ?? [])
-                .Where(typeName => !string.IsNullOrWhiteSpace(typeName))),
-            IsAbstract: definition.IsAbstract ?? false,
-            Inherit: inherit,
-            Properties: properties.ToImmutable(),
-            Attributes: ImmutableArray.CreateRange(
-                (definition.Attributes ?? [])
-                .Where(attribute => !string.IsNullOrWhiteSpace(attribute))),
-            IsPartial: definition.IsPartial ?? true,
-            InheritAttribute: definition.InheritAttribute ?? false,
-            ToNullable: definition.ToNullable ?? false,
-            ClassStyle: classStyle);
+        foreach (var (mode, modeId) in validModes)
+        {
+            var baseClassName = mode.ClassName ?? definition.ClassName ?? defaultClassName;
+            var className = (mode.Prefix ?? definition.Prefix ?? string.Empty)
+                + baseClassName
+                + (mode.Suffix ?? definition.Suffix ?? string.Empty);
+            var classStyle = ParseClassStyle(mode.ClassStyle ?? definition.ClassStyle);
+            var inherit = mode.Inherit ?? definition.Inherit
+                ?? (classStyle == ClassStyleEnum.Inpc
+                    ? "global::AutoCodeGenerator.InpcPropertyBindableBaseAbstract"
+                    : null);
+
+            var properties = ImmutableArray.CreateBuilder<SourceGeneratorPropertyInfo>();
+            var seenPropertyNames = new HashSet<string>(StringComparer.Ordinal);
+
+            foreach (var property in definition.Properties ?? [])
+            {
+                if (string.IsNullOrWhiteSpace(property.Name) || string.IsNullOrWhiteSpace(property.Type))
+                    continue;
+
+                if (!PropertyMatchesMode(property, modeId, hasExplicitModes: definition.Modes is { Length: > 0 }))
+                    continue;
+
+                var propertyName = (property.Prefix ?? string.Empty) + property.Name + (property.Suffix ?? string.Empty);
+                if (!seenPropertyNames.Add(propertyName))
+                {
+                    diagnostics.Add(GeneratorDiagnostics.Create(
+                        GeneratorDiagnostics.DuplicatePropertyName,
+                        sourceText is null
+                            ? Location.None
+                            : EntityFileLocations.TryFindPropertyName(filePath, sourceText, property.Name!),
+                        className,
+                        propertyName));
+                    continue;
+                }
+
+                if (CountTrue(property.IsVirtual, property.IsOverride, property.IsNew) > 1)
+                {
+                    var location = sourceText is null
+                        ? Location.None
+                        : EntityFileLocations.TryFindPropertyName(filePath, sourceText, property.Name!);
+                    diagnostics.Add(GeneratorDiagnostics.Create(
+                        GeneratorDiagnostics.InvalidPropertyModifier,
+                        location,
+                        className,
+                        propertyName));
+                    continue;
+                }
+
+                var isInit = property.IsInit == true && classStyle != ClassStyleEnum.Inpc;
+                var isRequired = property.IsRequired == true && classStyle != ClassStyleEnum.Inpc;
+
+                properties.Add(new SourceGeneratorPropertyInfo(
+                    Name: propertyName,
+                    Modifier: ParseAccessibility(property.Modifier),
+                    Summary: property.Summary ?? property.Name,
+                    Remarks: property.Remarks,
+                    Example: property.Example,
+                    IsVirtual: property.IsVirtual,
+                    IsOverride: property.IsOverride,
+                    IsNew: property.IsNew,
+                    Type: property.Type,
+                    DefaultValue: property.DefaultValue,
+                    IsNullable: property.IsNullable,
+                    Attributes: ImmutableArray.CreateRange(
+                        (property.Attributes ?? [])
+                        .Where(attribute => !string.IsNullOrWhiteSpace(attribute))),
+                    InheritAttributes: ImmutableArray.CreateRange(
+                        (property.InheritAttributes ?? [])
+                        .Where(attribute => !string.IsNullOrWhiteSpace(attribute))),
+                    IsInit: isInit,
+                    IsRequired: isRequired));
+            }
+
+            classInfos.Add(new SourceGeneratorClassInfo(
+                Name: className,
+                Modifier: ParseAccessibility(mode.Modifier ?? definition.Modifier),
+                Summary: mode.Summary ?? definition.Summary ?? baseClassName,
+                Remarks: mode.Remarks ?? definition.Remarks,
+                Example: mode.Example ?? definition.Example,
+                ClassNamespace: mode.Namespace ?? definition.Namespace ?? "Generated.Entities",
+                Usings: ImmutableArray.CreateRange(mode.Usings ?? definition.Usings ?? []),
+                Interfaces: ImmutableArray.CreateRange(
+                    (mode.Interfaces ?? definition.Interfaces ?? [])
+                    .Where(typeName => !string.IsNullOrWhiteSpace(typeName))),
+                IsAbstract: mode.IsAbstract ?? definition.IsAbstract ?? false,
+                Inherit: inherit,
+                Properties: properties.ToImmutable(),
+                Attributes: ImmutableArray.CreateRange(
+                    (mode.Attributes ?? definition.Attributes ?? [])
+                    .Where(attribute => !string.IsNullOrWhiteSpace(attribute))),
+                IsPartial: mode.IsPartial ?? definition.IsPartial ?? true,
+                InheritAttribute: mode.InheritAttribute ?? definition.InheritAttribute ?? false,
+                ToNullable: mode.ToNullable ?? definition.ToNullable ?? false,
+                ClassStyle: classStyle));
+        }
 
         return new GenerationResult(
-            baseClassName,
-            nullable,
-            ImmutableArray.Create(classInfo),
+            defaultClassName,
+            ParseNullable(definition.Nullable),
+            classInfos.ToImmutable(),
             diagnostics.ToImmutable());
+    }
+
+    private static EntityModeDefinition CreateRootMode(EntityFileDefinition definition)
+        => new()
+        {
+            Id = "default",
+            Namespace = definition.Namespace,
+            ClassName = definition.ClassName,
+            ClassStyle = definition.ClassStyle,
+            Modifier = definition.Modifier,
+            IsAbstract = definition.IsAbstract,
+            IsPartial = definition.IsPartial,
+            Prefix = definition.Prefix,
+            Suffix = definition.Suffix,
+            Summary = definition.Summary,
+            Remarks = definition.Remarks,
+            Example = definition.Example,
+            Inherit = definition.Inherit,
+            InheritAttribute = definition.InheritAttribute,
+            ToNullable = definition.ToNullable,
+            Usings = definition.Usings,
+            Interfaces = definition.Interfaces,
+            Attributes = definition.Attributes,
+        };
+
+    private static bool PropertyMatchesMode(EntityPropertyDefinition property, string modeId, bool hasExplicitModes)
+    {
+        if (!hasExplicitModes)
+            return true;
+
+        var ids = GetPropertyModeIds(property, hasExplicitModes: true).ToArray();
+        if (ids.Length == 0)
+            return true;
+
+        return ids.Contains(modeId, StringComparer.Ordinal);
+    }
+
+    private static IEnumerable<string> GetPropertyModeIds(EntityPropertyDefinition property, bool hasExplicitModes)
+    {
+        if (!hasExplicitModes)
+            yield break;
+
+        if (!string.IsNullOrWhiteSpace(property.Id))
+            yield return property.Id!;
+
+        foreach (var id in property.Ids ?? [])
+        {
+            if (!string.IsNullOrWhiteSpace(id))
+                yield return id;
+        }
     }
 
     private static int CountTrue(params bool?[] values)

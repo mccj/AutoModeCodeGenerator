@@ -1,0 +1,18 @@
+<Project>
+	<!-- 由 NuGet 包自动导入；消费项目可在 csproj 中覆盖这些属性。 -->
+	<PropertyGroup>
+		<!-- 是否从 AdditionalFiles 中的 *.entity.json 生成代码，默认启用 -->
+		<AutoModeGenerateEntityFiles Condition="'$(AutoModeGenerateEntityFiles)' == ''">true</AutoModeGenerateEntityFiles>
+		<!-- entity 附加文件后缀，默认 .entity.json -->
+		<AutoModeEntityFileSuffix Condition="'$(AutoModeEntityFileSuffix)' == ''">.entity.json</AutoModeEntityFileSuffix>
+		<!-- Morph.SearchRange / InjectMarkerMembers 默认区间类型模板，{0}=元素类型 -->
+		<AutoModeSearchRangeTemplate Condition="'$(AutoModeSearchRangeTemplate)' == ''">SearchRange&lt;{0}&gt;</AutoModeSearchRangeTemplate>
+	</PropertyGroup>
+
+	<!-- 供源生成器通过 AnalyzerConfigOptions / MSBuild 属性读取 -->
+	<ItemGroup>
+		<CompilerVisibleProperty Include="AutoModeGenerateEntityFiles" />
+		<CompilerVisibleProperty Include="AutoModeEntityFileSuffix" />
+		<CompilerVisibleProperty Include="AutoModeSearchRangeTemplate" />
+	</ItemGroup>
+</Project>

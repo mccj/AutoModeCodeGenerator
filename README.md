@@ -1,88 +1,65 @@
-# AutoModeCodeGenerator
+﻿# AutoModeCodeGenerator
 
 [![Build status](https://ci.appveyor.com/api/projects/status/yq70walphj0ewuob?svg=true)](https://ci.appveyor.com/project/mccj/automodecodegenerator)
 [![MyGet](https://img.shields.io/myget/mccj/vpre/AutoModeCodeGenerator.Analyzers.svg)](https://myget.org/feed/mccj/package/nuget/AutoModeCodeGenerator.Analyzers)
 [![NuGet](https://img.shields.io/nuget/v/AutoModeCodeGenerator.Analyzers.svg)](https://www.nuget.org/packages/AutoModeCodeGenerator.Analyzers)
 [![Apache License 2.0](https://img.shields.io/badge/license-Apache%202.0-orange.svg)](LICENSE)
 
-基于 Roslyn 的 C# 增量源生成器（Incremental Source Generator），通过特性标注在接口或类上，在编译期自动生成 POCO、Record、INPC 等样式的实现类。
+基于 Roslyn 的 C# **增量源生成器**：在接口/类上标注特性，编译期生成 SqlSugar / Admin.NET 风格的 **Entity / Dto / Create / Update / Detail / Search** 等多产物类型（只生成数据形状，不生成 Service / Controller）。
+
+**当前版本：1.0.1.0**
+
+**为何用：** 一份接口规格驱动六套 CRUD 类型，按 mode 投影字段，mixin 复用横切；用预设 / Relation / Morph 消灭六模式与外键样板。亦支持 `.entity.json` 声明式生成。消费架构与 Agent 硬规则见 [docs/AI_CONSUMER_GUIDE.md](docs/AI_CONSUMER_GUIDE.md)（§0）。
 
 ## 功能概览
 
-- 在**接口或类**上声明生成规则，按 `Id` 关联属性，一次定义可生成多个目标类
-- 支持 **Poco**、**Record**、**Inpc**（属性变更通知）三种生成样式
-- 自动继承接口成员、XML 文档注释、自定义 Attribute
-- 可配置命名空间、类名前后缀、访问修饰符、Nullable 上下文等
-- 作为 Analyzer 包发布，消费项目无需直接引用生成器程序集
-- 使用 `IIncrementalGenerator` + `ForAttributeWithMetadataName`，编译性能更好
+| 能力 | 版本 | 说明 |
+|------|------|------|
+| `[AutoCodeCrudModes]` | 2.2 | 一行展开 CRUD 六模式；`OmitModes` 支持 Entity-only |
+| `[AutoCodeRelation]` | 2.2 | 外键 → Id / Detail / Search / Navigate |
+| `[AutoCodeMorph]` | 2.3 | 文件 / 枚举双轨 / Search 区间 / CSV↔数组 |
+| `[AutoCodeColumn]` / `[AutoCodeIndex]` | 2.4 | 列长 / BigString / SugarIndex |
+| `ModeFlags` / `InheritDto` | 2.4 | 压缩 Ids；免拼 `InheritStr` |
+| `InjectMarkerMembers` | 2.5 | 自动投影 `InterfaceTypes` 未声明成员（如 CreateTime） |
+| Detail↔Dto 去重 | 2.5 | 继承同类型时避免 CS0108 |
+| 诊断 Mccj001–014 | 2.2–2.5 | 含 Mccj012 CodeFix「改用 AutoCodeCrudModes」 |
+| Obsolete 软弃用 | 1.0.1 | ClassModes / `*Str` / CustomAttribute → 新 API（行为保留） |
 
-## 项目结构
+**双主入口：** 特性（CRUD 预设等）与 `.entity.json` 并列；默认 ClassStyle **Poco**。`ClassStyle.Record` / `Inpc` 为样式选项。
 
-```
-AutoModeCodeGenerator/
-├── README.md
-├── LICENSE
-└── src/
-    ├── AutoModeCodeGenerator.slnx
-    ├── AutoModeCodeGenerator.Analyzers/     # 源生成器（NuGet 包）
-    │   ├── AutoCodeGenerator.cs             # 增量生成器入口
-    │   ├── GenerationModelExtractor.cs        # 从语义模型提取生成信息
-    │   ├── SourceGeneratorHelper.cs         # 生成文件头与调度
-    │   ├── SourceGeneratorInfo.cs           # 内部数据模型
-    │   ├── GeneratorDiagnostics.cs          # 诊断 Mccj001 / Mccj002 / Mccj003
-    │   ├── EmbeddedTemplates.cs             # 嵌入特性模板
-    │   ├── CodeGeneration/                  # 按 ClassStyle 分发代码输出
-    │   │   ├── CodeEmitter.cs
-    │   │   ├── PocoClassEmitter.cs
-    │   │   ├── RecordClassEmitter.cs
-    │   │   └── InpcClassEmitter.cs
-    │   ├── Templates/AutoCodeAttributes.cs  # 生成器输出的特性定义（嵌入资源）
-    │   ├── EntityFiles/                     # .entity.json 解析
-    │   │   ├── EntityFileParser.cs
-    │   │   ├── EntityFileDefinition.cs
-    │   │   ├── EntityFileLocations.cs
-    │   │   └── entity.schema.json           # 打包为 NuGet content/entity.schema.json
-    │   ├── AutoFilesGenerator.cs            # 从 .entity.json 生成 POCO/Record/Inpc
-    │   ├── README.md                        # NuGet 包使用文档（消费方）
-    │   ├── PACKAGING.md                     # NuGet 发包指南（维护者）
-    │   ├── NugetPackage.props               # 包元数据与打包项
-    │   ├── CodeAnalyzers.props              # 分析器 DLL 输出路径
-    │   ├── AnalyzerReleases.Shipped.md      # 已发布诊断规则追踪
-    │   └── AnalyzerReleases.Unshipped.md    # 待发布诊断规则追踪
-    ├── AutoModeCodeGenerator.Samples/       # 示例与本地验证
-    │   ├── TestModel.interface.cs
-    │   ├── TestModel.entity.json
-    │   └── Program.cs
-    └── AutoModeCodeGenerator.Tests/         # xUnit 源生成器单元测试
-        ├── SourceGeneratorTestHelper.cs
-        ├── PocoGenerationTests.cs
-        ├── RecordGenerationTests.cs
-        ├── InpcGenerationTests.cs
-        ├── InterfaceInheritanceTests.cs
-        ├── SyntaxValidationTests.cs
-        ├── EntityFileGenerationTests.cs
-        ├── AdvancedGenerationTests.cs
-        ├── AutoFilesGeneratorIntegrationTests.cs
-        └── DiagnosticTests.cs
-```
+## 文档导航
 
-| 项目 | 目标框架 | 说明 |
-|------|----------|------|
-| `AutoModeCodeGenerator.Analyzers` | netstandard2.0 | 源生成器，版本 `1.0.0.18`，构建时自动打包 |
-| `AutoModeCodeGenerator.Samples` | net8.0 | 本地引用 Analyzers 的演示项目 |
-| `AutoModeCodeGenerator.Tests` | net8.0 | 使用 Roslyn `GeneratorDriver` 的单元测试 |
+| 文档 | 对象 | 内容 |
+|------|------|------|
+| [Analyzers/README.md](src/AutoModeCodeGenerator.Analyzers/README.md) | 消费方 | **主文档**：安装、CRUD、Morph、Column/Index、诊断、MSBuild |
+| [docs/AI_CONSUMER_GUIDE.md](docs/AI_CONSUMER_GUIDE.md) | **AI / Agent** | 目的/架构/优势、决策树、标准模板、禁忌、诊断速查 |
+| [docs/UPGRADE_1x_TO_2x.md](docs/UPGRADE_1x_TO_2x.md) | 消费方 | 1.0.0.x → 1.0.1.x 升级与 Obsolete 迁移 |
+| [docs/CONVENTIONS_TEMPLATE.md](docs/CONVENTIONS_TEMPLATE.md) | 消费方 | mixin / CreateTime / 列索引可复制模板 |
+| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | 维护者 | 双主入口、管线与分层 |
+| [docs/ROADMAP.md](docs/ROADMAP.md) | 维护者 | **1.0.1 之后**建议与非目标 |
+| [docs/ANALYZER_DX_IMPROVEMENTS.md](docs/ANALYZER_DX_IMPROVEMENTS.md) | 维护者 | DeviceServer 试点驱动的 Analyzers DX 细则 |
+| [docs/IMPROVEMENT_PLAN.md](docs/IMPROVEMENT_PLAN.md) | 维护者 | 阶段 A–I 完成记录（历史） |
+| [CHANGELOG.md](CHANGELOG.md) | 所有人 | 版本变更 |
+| [PACKAGING.md](src/AutoModeCodeGenerator.Analyzers/PACKAGING.md) | 维护者 | NuGet / MyGet 发包 |
+| [Samples](src/AutoModeCodeGenerator.Samples/) | 本地验证 | CrudCookbook（含 2.4/2.5 示例） |
+
+更多索引：[docs/README.md](docs/README.md)。
 
 ## 安装
 
-### NuGet
-
 ```xml
-<PackageReference Include="AutoModeCodeGenerator.Analyzers" Version="1.0.0.18" PrivateAssets="all" />
+<PackageReference Include="AutoModeCodeGenerator.Analyzers" Version="1.0.1.0" PrivateAssets="all" />
 ```
 
-**使用文档**（安装、特性参数、`.entity.json` 字段、诊断等）见 [`src/AutoModeCodeGenerator.Analyzers/README.md`](src/AutoModeCodeGenerator.Analyzers/README.md)，该文件会作为 NuGet 包 README 发布。
+可选约定包（无 SqlSugar 程序集依赖）：
 
-### 项目引用（本地开发）
+```xml
+<PackageReference Include="AutoModeCodeGenerator.Conventions.SqlSugar" Version="1.0.1.0" />
+```
+
+完整说明见 **[Analyzers/README.md](src/AutoModeCodeGenerator.Analyzers/README.md)**（随 NuGet 发布）。
+
+### 本地 ProjectReference
 
 ```xml
 <ProjectReference Include="..\AutoModeCodeGenerator.Analyzers\AutoModeCodeGenerator.Analyzers.csproj"
@@ -90,56 +67,85 @@ AutoModeCodeGenerator/
                   ReferenceOutputAssembly="false" />
 ```
 
-可选：将生成代码输出到磁盘，便于查看：
+### 常用 MSBuild
 
 ```xml
-<EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
-<CompilerGeneratedFilesOutputPath>$(BaseIntermediateOutputPath)Generated</CompilerGeneratedFilesOutputPath>
+<PropertyGroup>
+  <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+  <CompilerGeneratedFilesOutputPath>$(BaseIntermediateOutputPath)Generated</CompilerGeneratedFilesOutputPath>
+  <AutoModeGenerateEntityFiles>false</AutoModeGenerateEntityFiles>
+  <!-- Morph / InjectMarkerMembers 默认区间类型；Device 项目可改为 SearchRangeForStructValue<{0}> -->
+  <AutoModeSearchRangeTemplate>SearchRangeForStructValue&lt;{0}&gt;</AutoModeSearchRangeTemplate>
+</PropertyGroup>
 ```
 
-## 使用说明
+## 最小示例
 
-完整的使用文档见 **[Analyzers/README.md](src/AutoModeCodeGenerator.Analyzers/README.md)**，内容包括：
+```csharp
+using AutoCodeGenerator;
 
-- 特性方式快速开始与 Id 关联机制
-- `AutoCodeClassModes`、`AutoCodeProperty`、`AutoCodeNullable`、`CustomAttributeAttribute` 参数表
-- `ClassStyle`（Poco / Record / Inpc）与生成文件命名
-- 诊断 `Mccj001`–`Mccj003`
-- `.entity.json` 配置与 `entity.schema.json` 引用
+[AutoCodeCrudModes(EntityInterfaceTypes = [typeof(IEntityMarker)])]
+public interface Product : IHasLongId
+{
+    [AutoCodeProperty(ModeFlags = AutoCodeModeFlags.EntityDtoSearch)]
+    [AutoCodeColumn(Length = 128)]
+    string? Name { get; set; }
 
-本地可运行示例项目验证：
-
-```bash
-dotnet run --project src/AutoModeCodeGenerator.Samples/Samples.csproj
+    [AutoCodeRelation(TargetName = nameof(Category), IncludeNavigate = false)]
+    long Category { get; set; }
+}
 ```
 
-示例源码：[`TestModel.interface.cs`](src/AutoModeCodeGenerator.Samples/TestModel.interface.cs)、[`TestModel.entity.json`](src/AutoModeCodeGenerator.Samples/TestModel.entity.json)。
+生成：`ProductRecord`、`ProductDto`、`ProductCreateInput`、`ProductUpdateInput`、`ProductDetailOutput`、`ProductSearchInput`。
+
+## 项目结构
+
+```
+AutoModeCodeGenerator/
+├── README.md / CHANGELOG.md / LICENSE
+├── docs/                          # 消费方/AI/维护者文档（见 docs/README.md）
+└── src/
+    ├── AutoModeCodeGenerator.Analyzers/      # 源生成器 + 诊断/CodeFix（NuGet）
+    │   ├── Extraction/ / Expansion/          # 管线：见 docs/ARCHITECTURE.md
+    │   ├── CodeGeneration/ / EntityFiles/    # 共享 Emit / entity.json
+    │   ├── Diagnostics/ / Templates/         # Mccj* / 嵌入公共 API
+    ├── AutoModeCodeGenerator.Conventions.SqlSugar/
+    ├── AutoModeCodeGenerator.Samples/
+    └── AutoModeCodeGenerator.Tests/
+```
+
+| 项目 | TFM | 说明 |
+|------|-----|------|
+| Analyzers | netstandard2.0 | **1.0.1.0**，`PrivateAssets=all` 消费 |
+| Conventions.SqlSugar | netstandard2.0 | 可选字符串模板 |
+| Samples | net8.0 | 本地验证 |
+| Tests | net8.0 | GeneratorDriver + Analyzer/CodeFix |
+
+公共 API 命名空间：`AutoCodeGenerator`。内部：`AutoModeCodeGenerator.Internal`。
 
 ## 开发与构建
 
 ```bash
-# 构建整个解决方案
 dotnet build src/AutoModeCodeGenerator.slnx
-
-# 运行单元测试
 dotnet test src/AutoModeCodeGenerator.Tests/AutoModeCodeGenerator.Tests.csproj
-
-# 运行示例
 dotnet run --project src/AutoModeCodeGenerator.Samples/Samples.csproj
+dotnet pack src/AutoModeCodeGenerator.Analyzers/AutoModeCodeGenerator.Analyzers.csproj -c Release
 ```
 
-- Analyzers 项目启用 `GeneratePackageOnBuild`，输出 NuGet 包至 `bin/`。
-- 测试项目通过 `CSharpGeneratorDriver` 在内存中编译测试源码并断言生成结果，无需启动完整 MSBuild。
-- 测试覆盖：Poco / Record / Inpc 生成、接口继承、特性高级选项（`ToNullable`、`CustomAttribute`、类声明源等）、`.entity.json` 解析与 `AutoFilesGenerator` 集成、诊断 `Mccj001`–`Mccj003`。
+- 测试覆盖：Poco/Record/Inpc、CRUD/Relation/Morph、Column/Index、Inject、Mccj001–014、CodeFix、nupkg 内容。
+- CI：[`.github/workflows/ci.yml`](.github/workflows/ci.yml)；发包见 [PACKAGING.md](src/AutoModeCodeGenerator.Analyzers/PACKAGING.md)。
 
 ### 调试源生成器
 
-在 `AutoCodeGenerator.Initialize` 方法开头临时添加 `System.Diagnostics.Debugger.Launch();`，编译消费项目时会附加调试器。调试完成后记得移除。
+在 `AutoCodeGenerator.Initialize` 开头临时 `Debugger.Launch();`，编译消费项目时附加；调试完移除。
 
-## 路线图 / 已知限制
+## 2.0 破坏性变更（摘要）
 
-- 正式测试见 `AutoModeCodeGenerator.Tests`（含 `AutoFilesGenerator` 集成测试）。
-- CI：GitHub Actions（`.github/workflows/ci.yml`）在 push/PR 时运行 `dotnet build` 与 `dotnet test`。
+- `ClassStyle.Record` → 真正的 `record class`（`init`）
+- Inpc 基类实现 `INotifyPropertyChanged`
+- 内部命名空间改为 `AutoModeCodeGenerator.Internal`
+
+详见 [CHANGELOG.md](CHANGELOG.md)。1.x CRUD 升 2.x 默认 **Poco 无破坏**。
 
 ## 许可证
 

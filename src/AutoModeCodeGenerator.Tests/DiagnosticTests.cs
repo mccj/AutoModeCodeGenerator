@@ -34,5 +34,12 @@ public class DiagnosticTests
         Assert.Contains("class AutoCodePropertyAttribute", generated);
         Assert.Contains("class AutoCodeNullableAttribute", generated);
         Assert.Contains("class CustomAttributeAttribute", generated);
+        Assert.Contains("class AutoCodeColumnAttribute", generated);
+        Assert.Contains("class AutoCodeIndexAttribute", generated);
+        Assert.Contains("enum AutoCodeModeFlags", generated);
+        Assert.Contains("InheritDto", generated);
+        Assert.Contains("INotifyPropertyChanged", generated);
+        Assert.Contains("IsInit", generated);
+        Assert.Contains("IsRequired", generated);
     }
 }

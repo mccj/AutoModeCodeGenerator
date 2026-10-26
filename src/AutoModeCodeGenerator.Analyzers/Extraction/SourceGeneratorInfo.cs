@@ -1,9 +1,12 @@
-﻿using System.Collections.Immutable;
+using System.Collections.Immutable;
 
 using Microsoft.CodeAnalysis;
 
-namespace 自动代码生成;
+namespace AutoModeCodeGenerator.Internal;
 
+/// <summary>
+/// Emit 中间模型：属性绑定（特性 Extract / entity.json 解析最终都落到此结构）。
+/// </summary>
 public sealed record SourceGeneratorPropertyInfo(
     string? Name,
     Accessibility? Modifier,
@@ -17,8 +20,13 @@ public sealed record SourceGeneratorPropertyInfo(
     string? DefaultValue,
     bool? IsNullable,
     ImmutableArray<string> Attributes,
-    ImmutableArray<string> InheritAttributes);
+    ImmutableArray<string> InheritAttributes,
+    bool IsInit = false,
+    bool IsRequired = false);
 
+/// <summary>
+/// Emit 中间模型：单个生成类型（Poco / Record / Inpc 发射器的输入）。
+/// </summary>
 public sealed record SourceGeneratorClassInfo(
     string? Name,
     Accessibility? Modifier,

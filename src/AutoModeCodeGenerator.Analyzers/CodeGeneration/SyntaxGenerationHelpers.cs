@@ -5,7 +5,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace 自动代码生成.CodeGeneration;
+namespace AutoModeCodeGenerator.Internal.CodeGeneration;
 
 internal static class SyntaxGenerationHelpers
 {
@@ -28,7 +28,10 @@ internal static class SyntaxGenerationHelpers
         var lists = new List<AttributeListSyntax>();
 
         foreach (var attribute in customAttributes.Where(a => !string.IsNullOrWhiteSpace(a)))
-            lists.Add(ParseAttributeList(attribute));
+        {
+            if (TryParseAttributeList(attribute, out var parsed) && parsed is not null)
+                lists.Add(parsed);
+        }
 
         if (includeCompilerGenerated)
         {
@@ -67,6 +70,8 @@ internal static class SyntaxGenerationHelpers
         var tokens = new List<SyntaxToken>();
         if (property.IsNew == true)
             tokens.Add(SyntaxFactory.Token(SyntaxKind.NewKeyword));
+        if (property.IsRequired)
+            tokens.Add(SyntaxFactory.Token(SyntaxKind.RequiredKeyword));
         AddAccessibility(tokens, property.Modifier);
         if (property.IsVirtual == true)
             tokens.Add(SyntaxFactory.Token(SyntaxKind.VirtualKeyword));
@@ -124,7 +129,8 @@ internal static class SyntaxGenerationHelpers
         SourceGeneratorClassInfo classInfo,
         SourceGeneratorPropertyInfo property,
         bool includeSetter,
-        string? initializerText)
+        string? initializerText,
+        bool useInitSetter = false)
     {
         var propertyType = CodeGenerationHelpers.GetPropertyType(property, classInfo);
         var accessors = new List<AccessorDeclarationSyntax>
@@ -133,9 +139,12 @@ internal static class SyntaxGenerationHelpers
                 .WithSemicolonToken(SyntaxFactory.Token(SyntaxKind.SemicolonToken))
         };
 
-        if (includeSetter)
+        if (includeSetter || useInitSetter || property.IsInit)
         {
-            accessors.Add(SyntaxFactory.AccessorDeclaration(SyntaxKind.SetAccessorDeclaration)
+            var setterKind = (useInitSetter || property.IsInit)
+                ? SyntaxKind.InitAccessorDeclaration
+                : SyntaxKind.SetAccessorDeclaration;
+            accessors.Add(SyntaxFactory.AccessorDeclaration(setterKind)
                 .WithSemicolonToken(SyntaxFactory.Token(SyntaxKind.SemicolonToken)));
         }
 
@@ -154,21 +163,57 @@ internal static class SyntaxGenerationHelpers
             .WithSemicolonToken(SyntaxFactory.Token(SyntaxKind.SemicolonToken));
     }
 
-    public static MemberDeclarationSyntax ParseMember(string memberDeclaration)
-        => SyntaxFactory.ParseMemberDeclaration(memberDeclaration)
-            ?? throw new InvalidOperationException($"无法解析成员声明: {memberDeclaration}");
-
     public static string FormatCompilationUnit(CompilationUnitSyntax compilationUnit)
         => compilationUnit
             .NormalizeWhitespace(eol: "\r\n")
             .GetText(Encoding.UTF8)
             .ToString();
 
-    private static AttributeListSyntax ParseAttributeList(string attributeText)
+    public static bool TryParseAttributeList(string attributeText, out AttributeListSyntax? attributeList)
     {
-        var member = SyntaxFactory.ParseMemberDeclaration("[" + attributeText + "]\r\nclass __Dummy { }") as ClassDeclarationSyntax
-            ?? throw new InvalidOperationException($"无法解析特性: {attributeText}");
-        return member.AttributeLists[0];
+        attributeList = null;
+        try
+        {
+            if (SyntaxFactory.ParseMemberDeclaration("[" + attributeText + "]\r\nclass __Dummy { }")
+                is not ClassDeclarationSyntax member
+                || member.AttributeLists.Count == 0)
+            {
+                return false;
+            }
+
+            var list = member.AttributeLists[0];
+            if (list.Attributes.Count == 0)
+                return false;
+
+            foreach (var attr in list.Attributes)
+            {
+                if (attr.ContainsDiagnostics || attr.Name.ContainsDiagnostics)
+                    return false;
+
+                // 特性名首段须为合法标识符（拒绝 1Foo、(( 等）
+                // 校验特性名各段为合法标识符（支持 global::A.B、A.BAttribute、泛型）
+                var nameText = attr.Name.ToString().Trim();
+                if (nameText.StartsWith("global::", StringComparison.Ordinal))
+                    nameText = nameText.Substring("global::".Length);
+
+                var lt = nameText.IndexOf('<');
+                if (lt >= 0)
+                    nameText = nameText.Substring(0, lt);
+
+                foreach (var segment in nameText.Split(new[] { '.' }, StringSplitOptions.RemoveEmptyEntries))
+                {
+                    if (segment.Length == 0 || !SyntaxFacts.IsValidIdentifier(segment))
+                        return false;
+                }
+            }
+
+            attributeList = list;
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
     }
 
     private static void AppendDocSection(StringBuilder builder, string tag, string? content)

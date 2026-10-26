@@ -3,6 +3,7 @@
     <File Path="../README.md" />
   </Folder>
   <Project Path="AutoModeCodeGenerator.Analyzers/AutoModeCodeGenerator.Analyzers.csproj" />
+  <Project Path="AutoModeCodeGenerator.Conventions.SqlSugar/AutoModeCodeGenerator.Conventions.SqlSugar.csproj" />
   <Project Path="AutoModeCodeGenerator.Samples/Samples.csproj" />
   <Project Path="AutoModeCodeGenerator.Tests/AutoModeCodeGenerator.Tests.csproj" />
 </Solution>

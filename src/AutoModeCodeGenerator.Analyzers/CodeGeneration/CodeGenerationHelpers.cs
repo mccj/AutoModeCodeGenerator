@@ -1,22 +1,13 @@
-using System.Collections.Immutable;
+﻿using System.Collections.Immutable;
 
 using Microsoft.CodeAnalysis;
 
-namespace 自动代码生成.CodeGeneration;
+namespace AutoModeCodeGenerator.Internal.CodeGeneration;
 
 internal static class CodeGenerationHelpers
 {
     public static string GetPropertyType(SourceGeneratorPropertyInfo property, SourceGeneratorClassInfo classInfo)
         => property.Type + (property.IsNullable == true || classInfo.ToNullable ? "?" : "");
-
-    public static string BuildPropertyModifiers(SourceGeneratorPropertyInfo property)
-        => string.Join(" ", new[]
-        {
-            property.IsNew == true ? "new" : "",
-            ModifierToString(property.Modifier),
-            property.IsVirtual == true ? "virtual" : "",
-            property.IsOverride == true ? "override" : ""
-        }.Where(part => !string.IsNullOrWhiteSpace(part)));
 
     public static ImmutableArray<string> GetPropertyAttributes(SourceGeneratorPropertyInfo property, SourceGeneratorClassInfo classInfo)
     {

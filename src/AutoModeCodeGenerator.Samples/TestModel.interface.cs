@@ -2,6 +2,9 @@
 
 #nullable enable
 
+// 刻意保留 AutoCodeClassModes 样例（2.6 起 Obsolete，仍可用）
+#pragma warning disable CS0618
+
 [AutoCodeGenerator.AutoCodeNullable(Type = AutoCodeGenerator.NullableEnum.Enable)]
 [AutoCodeGenerator.AutoCodeClassModes(Id = "a1", Namespace = "bbb", Suffix = "ccc", Summary = "eeeeeeeeeeeeeeeeee", Modifier = AutoCodeGenerator.AccessibilityEnum.Internal, ClassStyle = AutoCodeGenerator.ClassStyleEnum.Record)]
 [AutoCodeGenerator.AutoCodeClassModes(Id = "a2", Namespace = "ccc", InheritAttribute = true, ClassStyle = AutoCodeGenerator.ClassStyleEnum.Inpc,InheritType =typeof(AutoCodeGenerator.InpcPropertyBindableBaseAbstract))]

@@ -3,11 +3,14 @@ using System.Text;
 using System.Text.RegularExpressions;
 
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CodeActions;
+using Microsoft.CodeAnalysis.CodeFixes;
 using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Text;
 
-using 自动代码生成;
-using 自动代码生成.EntityFiles;
+using AutoModeCodeGenerator.Internal;
+using AutoModeCodeGenerator.Internal.EntityFiles;
 
 namespace AutoModeCodeGenerator.Tests;
 
@@ -20,19 +23,56 @@ internal sealed class InMemoryAdditionalText(string path, string content) : Addi
     public override SourceText GetText(CancellationToken cancellationToken = default) => _sourceText;
 }
 
+internal sealed class TestAnalyzerConfigOptions(Dictionary<string, string> values) : AnalyzerConfigOptions
+{
+    public override bool TryGetValue(string key, out string value)
+        => values.TryGetValue(key, out value!);
+}
+
+internal sealed class TestAnalyzerConfigOptionsProvider(Dictionary<string, string> globalValues) : AnalyzerConfigOptionsProvider
+{
+    private readonly TestAnalyzerConfigOptions _global = new(globalValues);
+
+    public override AnalyzerConfigOptions GlobalOptions => _global;
+
+    public override AnalyzerConfigOptions GetOptions(SyntaxTree tree) => _global;
+
+    public override AnalyzerConfigOptions GetOptions(AdditionalText textFile) => _global;
+}
+
 internal static class SourceGeneratorTestHelper
 {
-    private static readonly MetadataReference[] References =
-    [
-        MetadataReference.CreateFromFile(typeof(object).Assembly.Location),
-        MetadataReference.CreateFromFile(typeof(Attribute).Assembly.Location),
-        MetadataReference.CreateFromFile(typeof(System.ComponentModel.DisplayNameAttribute).Assembly.Location),
-        MetadataReference.CreateFromFile(typeof(System.Runtime.CompilerServices.CompilerGeneratedAttribute).Assembly.Location),
-    ];
+    private static readonly MetadataReference[] References = CreateReferences();
+
+    private static MetadataReference[] CreateReferences()
+    {
+        var refs = new List<MetadataReference>
+        {
+            MetadataReference.CreateFromFile(typeof(object).Assembly.Location),
+            MetadataReference.CreateFromFile(typeof(Attribute).Assembly.Location),
+            MetadataReference.CreateFromFile(typeof(System.ComponentModel.DisplayNameAttribute).Assembly.Location),
+            MetadataReference.CreateFromFile(typeof(System.ComponentModel.INotifyPropertyChanged).Assembly.Location),
+            MetadataReference.CreateFromFile(typeof(System.Runtime.CompilerServices.CompilerGeneratedAttribute).Assembly.Location),
+        };
+
+        // 内存编译需要 System.Runtime 外观程序集，才能解析 MulticastDelegate / 事件等。
+        var runtimeDir = Path.GetDirectoryName(typeof(object).Assembly.Location)!;
+        foreach (var name in new[] { "System.Runtime.dll", "netstandard.dll", "System.Collections.dll" })
+        {
+            var path = Path.Combine(runtimeDir, name);
+            if (File.Exists(path))
+                refs.Add(MetadataReference.CreateFromFile(path));
+        }
+
+        return refs.ToArray();
+    }
 
     public static MetadataReference[] GetMetadataReferences() => References;
 
-    public static GeneratorRunResult RunGenerator(string source, string fileName = "TestModel.cs")
+    public static GeneratorRunResult RunGenerator(
+        string source,
+        string fileName = "TestModel.cs",
+        Dictionary<string, string>? analyzerConfigOptions = null)
     {
         var compilation = CSharpCompilation.Create(
             assemblyName: "SourceGeneratorTests",
@@ -42,12 +82,81 @@ internal static class SourceGeneratorTestHelper
                 OutputKind.DynamicallyLinkedLibrary,
                 nullableContextOptions: NullableContextOptions.Enable));
 
-        GeneratorDriver driver = CSharpGeneratorDriver.Create(new AutoCodeGenerator());
+        var optionsProvider = analyzerConfigOptions is null
+            ? null
+            : new TestAnalyzerConfigOptionsProvider(analyzerConfigOptions);
+
+        GeneratorDriver driver = CSharpGeneratorDriver.Create(
+            generators: [new AutoCodeGenerator().AsSourceGenerator()],
+            additionalTexts: null,
+            parseOptions: null,
+            optionsProvider: optionsProvider);
         driver = driver.RunGeneratorsAndUpdateCompilation(compilation, out _, out _);
         return driver.GetRunResult().Results[0];
     }
 
-    public static GeneratorRunResult RunEntityFilesGenerator(string entityPath, string entityJson, string? source = null)
+    public static ImmutableArray<Diagnostic> RunAnalyzer(string source, string fileName = "TestModel.cs")
+    {
+        var tree = CSharpSyntaxTree.ParseText(source, path: fileName);
+        // Include generated attributes so AutoCode* names resolve for semantic model if needed;
+        // analyzer itself is syntax-based.
+        var compilation = CSharpCompilation.Create(
+            "AnalyzerTests",
+            [tree],
+            References,
+            new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary, nullableContextOptions: NullableContextOptions.Enable));
+
+        var analyzers = ImmutableArray.Create<DiagnosticAnalyzer>(new SuggestCrudModesAnalyzer());
+        var compilationWithAnalyzers = compilation.WithAnalyzers(analyzers);
+        return compilationWithAnalyzers.GetAnalyzerDiagnosticsAsync().Result;
+    }
+
+    public static string ApplyCodeFix(string source, string diagnosticId, string fileName = "TestModel.cs")
+    {
+        var workspace = new AdhocWorkspace();
+        var projectId = ProjectId.CreateNewId();
+        var documentId = DocumentId.CreateNewId(projectId);
+
+        var solution = workspace.CurrentSolution
+            .AddProject(projectId, "CodeFixTest", "CodeFixTest", LanguageNames.CSharp)
+            .WithProjectCompilationOptions(
+                projectId,
+                new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary, nullableContextOptions: NullableContextOptions.Enable))
+            .WithProjectMetadataReferences(projectId, References)
+            .AddDocument(documentId, fileName, source);
+
+        workspace.TryApplyChanges(solution);
+        var document = workspace.CurrentSolution.GetDocument(documentId)!;
+
+        var analyzers = ImmutableArray.Create<DiagnosticAnalyzer>(new SuggestCrudModesAnalyzer());
+        var compilation = document.Project.GetCompilationAsync().Result!;
+        var diagnostics = compilation.WithAnalyzers(analyzers).GetAnalyzerDiagnosticsAsync().Result
+            .Where(d => d.Id == diagnosticId)
+            .ToImmutableArray();
+
+        Assert.NotEmpty(diagnostics);
+
+        var provider = new SuggestCrudModesCodeFixProvider();
+        var actions = new List<CodeAction>();
+        var context = new CodeFixContext(
+            document,
+            diagnostics[0],
+            (action, _) => actions.Add(action),
+            CancellationToken.None);
+        provider.RegisterCodeFixesAsync(context).GetAwaiter().GetResult();
+        Assert.NotEmpty(actions);
+
+        var operations = actions[0].GetOperationsAsync(CancellationToken.None).Result;
+        var apply = operations.OfType<ApplyChangesOperation>().Single();
+        var newDoc = apply.ChangedSolution.GetDocument(documentId)!;
+        return newDoc.GetTextAsync().Result.ToString();
+    }
+
+    public static GeneratorRunResult RunEntityFilesGenerator(
+        string entityPath,
+        string entityJson,
+        string? source = null,
+        Dictionary<string, string>? analyzerConfigOptions = null)
     {
         var trees = new List<SyntaxTree>();
         if (!string.IsNullOrWhiteSpace(source))
@@ -61,10 +170,15 @@ internal static class SourceGeneratorTestHelper
                 OutputKind.DynamicallyLinkedLibrary,
                 nullableContextOptions: NullableContextOptions.Enable));
 
+        var optionsProvider = analyzerConfigOptions is null
+            ? null
+            : new TestAnalyzerConfigOptionsProvider(analyzerConfigOptions);
+
         GeneratorDriver driver = CSharpGeneratorDriver.Create(
             [new AutoFilesGenerator().AsSourceGenerator()],
             additionalTexts: ImmutableArray.Create<AdditionalText>(new InMemoryAdditionalText(entityPath, entityJson)),
-            parseOptions: CSharpParseOptions.Default);
+            parseOptions: CSharpParseOptions.Default,
+            optionsProvider: optionsProvider);
 
         driver = driver.RunGeneratorsAndUpdateCompilation(compilation, out _, out _);
         return driver.GetRunResult().Results[0];
@@ -139,6 +253,17 @@ internal static class SourceGeneratorTestHelper
 
     public static ImmutableArray<Diagnostic> GetGeneratorDiagnostics(GeneratorRunResult result)
         => result.Diagnostics;
+
+    public static string GetGeneratedSourcesContaining(GeneratorRunResult result, string nameFragment)
+    {
+        var parts = result.GeneratedSources
+            .Where(s => s.HintName.Contains(nameFragment, StringComparison.OrdinalIgnoreCase)
+                        && !s.HintName.Equals("AutoCodeAttribute.g.cs", StringComparison.Ordinal))
+            .Select(s => s.SourceText.ToString())
+            .ToArray();
+        Assert.NotEmpty(parts);
+        return string.Join("\n", parts);
+    }
 
     public static string NormalizeGeneratedCode(string source)
     {

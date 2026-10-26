@@ -41,6 +41,29 @@ jobs:
       - name: Build
         run: dotnet build src/AutoModeCodeGenerator.slnx --no-restore
 
-      # 运行全部测试项目；--no-build 复用编译产物
+      # 校验 csproj Version 与 README 安装示例一致
+      - name: Verify version consistency
+        run: |
+          set -euo pipefail
+          VERSION=$(grep -oP '(?<=<Version>)[^<]+' src/AutoModeCodeGenerator.Analyzers/AutoModeCodeGenerator.Analyzers.csproj | head -1)
+          echo "csproj Version=$VERSION"
+          grep -q "Version=\"$VERSION\"" src/AutoModeCodeGenerator.Analyzers/README.md
+          grep -q "Version=\"$VERSION\"" README.md
+          grep -q "$VERSION" README.md
+
+      # Release 打包，供包内容断言与单元测试 PackageContentTests 使用
+      - name: Pack analyzers
+        run: dotnet pack src/AutoModeCodeGenerator.Analyzers/AutoModeCodeGenerator.Analyzers.csproj -c Release --no-restore
+
+      - name: Assert nupkg contains System.Text.Json
+        run: |
+          set -euo pipefail
+          NUPKG=$(ls src/AutoModeCodeGenerator.Analyzers/bin/Release/AutoModeCodeGenerator.Analyzers.*.nupkg | head -1)
+          echo "Checking $NUPKG"
+          unzip -l "$NUPKG" | grep -F "analyzers/dotnet/cs/System.Text.Json.dll"
+          unzip -l "$NUPKG" | grep -F "analyzers/dotnet/cs/AutoModeCodeGenerator.Analyzers.dll"
+          unzip -l "$NUPKG" | grep -F "build/AutoModeCodeGenerator.Analyzers.props"
+
+      # 运行全部测试项目；需重新 build 以包含最新测试（pack 后 Debug 测试仍可用已构建产物）
       - name: Test
         run: dotnet test src/AutoModeCodeGenerator.slnx --no-build --verbosity normal

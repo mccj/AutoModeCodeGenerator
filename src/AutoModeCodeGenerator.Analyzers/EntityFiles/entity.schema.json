@@ -39,12 +39,45 @@
     "usings": { "type": "array", "items": { "type": "string" } },
     "interfaces": { "type": "array", "items": { "type": "string" } },
     "attributes": { "type": "array", "items": { "type": "string" } },
+    "modes": {
+      "type": "array",
+      "description": "多模式定义；省略时使用根级单类配置",
+      "items": { "$ref": "#/$defs/mode" }
+    },
     "properties": {
       "type": "array",
       "items": { "$ref": "#/$defs/property" }
     }
   },
   "$defs": {
+    "mode": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id"],
+      "properties": {
+        "id": { "type": "string" },
+        "namespace": { "type": "string" },
+        "className": { "type": "string" },
+        "classStyle": { "type": "string", "enum": ["Poco", "Record", "Inpc", "poco", "record", "inpc"] },
+        "modifier": {
+          "type": "string",
+          "enum": ["public", "internal", "protected", "private", "protected internal", "private protected"]
+        },
+        "isAbstract": { "type": "boolean" },
+        "isPartial": { "type": "boolean" },
+        "prefix": { "type": "string" },
+        "suffix": { "type": "string" },
+        "summary": { "type": "string" },
+        "remarks": { "type": "string" },
+        "example": { "type": "string" },
+        "inherit": { "type": "string" },
+        "inheritAttribute": { "type": "boolean" },
+        "toNullable": { "type": "boolean" },
+        "usings": { "type": "array", "items": { "type": "string" } },
+        "interfaces": { "type": "array", "items": { "type": "string" } },
+        "attributes": { "type": "array", "items": { "type": "string" } }
+      }
+    },
     "property": {
       "type": "object",
       "additionalProperties": false,
@@ -52,6 +85,12 @@
       "properties": {
         "name": { "type": "string" },
         "type": { "type": "string" },
+        "id": { "type": "string", "description": "绑定的单个 mode id" },
+        "ids": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "绑定的多个 mode id"
+        },
         "prefix": { "type": "string" },
         "suffix": { "type": "string" },
         "modifier": {
@@ -62,6 +101,8 @@
         "isVirtual": { "type": "boolean" },
         "isOverride": { "type": "boolean" },
         "isNew": { "type": "boolean" },
+        "isInit": { "type": "boolean" },
+        "isRequired": { "type": "boolean" },
         "defaultValue": { "type": "string" },
         "summary": { "type": "string" },
         "remarks": { "type": "string" },
