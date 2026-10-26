@@ -125,6 +125,6 @@ AutoModeCodeGenerator.Analyzers/
 | 文档 | 用途 |
 |------|------|
 | [AI_CONSUMER_GUIDE.md](AI_CONSUMER_GUIDE.md) §0 | 消费目的 / 架构 / 优势（Agent 真源） |
-| [ROADMAP.md](ROADMAP.md) | 2.6 之后建议与非目标 |
+| [ROADMAP.md](ROADMAP.md) | 1.0.1 之后建议与非目标 |
 | [IMPROVEMENT_PLAN.md](IMPROVEMENT_PLAN.md) | 阶段 A–I 历史完成记录 |
 | [PACKAGING.md](../src/AutoModeCodeGenerator.Analyzers/PACKAGING.md) | 发包 |

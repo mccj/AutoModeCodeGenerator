@@ -2,7 +2,7 @@
 
 可选约定包：**不依赖** SqlSugar 程序集，只提供特性字符串模板与 mixin 说明。
 
-主生成器包 `AutoModeCodeGenerator.Analyzers`（**≥ 2.5**）保持 ORM 无关。完整可复制模板：[docs/CONVENTIONS_TEMPLATE.md](https://github.com/mccj/AutoModeCodeGenerator/blob/main/docs/CONVENTIONS_TEMPLATE.md)。
+主生成器包 `AutoModeCodeGenerator.Analyzers`（**≥ 1.0.1.0**）保持 ORM 无关。完整可复制模板：[docs/CONVENTIONS_TEMPLATE.md](https://github.com/mccj/AutoModeCodeGenerator/blob/main/docs/CONVENTIONS_TEMPLATE.md)。
 
 ## 安装
 

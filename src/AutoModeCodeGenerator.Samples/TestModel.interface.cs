@@ -2,7 +2,7 @@
 
 #nullable enable
 
-// 刻意保留 AutoCodeClassModes 样例（2.6 起 Obsolete，仍可用）
+// 刻意保留 AutoCodeClassModes 样例（1.0.1 起 Obsolete，仍可用）
 #pragma warning disable CS0618
 
 [AutoCodeGenerator.AutoCodeNullable(Type = AutoCodeGenerator.NullableEnum.Enable)]

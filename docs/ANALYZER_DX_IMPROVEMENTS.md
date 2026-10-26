@@ -1,13 +1,13 @@
 # Analyzers DX 改进建议（基于 DeviceServer 试点）
 
-> **状态：** 规划草案（2026-10-26）；**2.5.1** 已落地 `SearchRangeType` / Morph `RangeType`（字符串模板仍兼容）。  
-> **依据：** `物联网设备平台-DeviceDriver5` 升至 **2.5.x** 的真实用法（见消费方 `EntityAutoGenerator/PILOT_2x.md`）  
+> **状态：** 规划草案（2026-10-26）；**1.0.1.0** 已含 `SearchRangeType` / Morph `RangeType`（字符串模板仍兼容）。  
+> **依据：** `物联网设备平台-DeviceDriver5` 试点真实用法（见消费方 `EntityAutoGenerator` 试点笔记）  
 > **定位：** 补充 [ROADMAP.md](ROADMAP.md) 的细化清单；**不以再堆 Morph/Relation API 为主**，优先补齐 IDE 诊断与 CodeFix，消灭一次性迁移脚本。  
-> **历史计划：** 阶段 A–I 见 [IMPROVEMENT_PLAN.md](IMPROVEMENT_PLAN.md)（已归档，勿再开新阶段）。
+> **历史计划：** 阶段 A–I 见 [IMPROVEMENT_PLAN.md](IMPROVEMENT_PLAN.md)（已归档）。
 
 ## 背景结论
 
-2.5.0 的**生成能力**已覆盖 DeviceServer 主路径（`AutoCodeCrudModes`、简单 `AutoCodeRelation`、`Morph.SearchRange` + `AutoModeSearchRangeTemplate`）。
+**1.0.1** 的生成能力已覆盖 DeviceServer 主路径（`AutoCodeCrudModes`、简单 `AutoCodeRelation`、`Morph.SearchRange` + `AutoModeSearchRangeTemplate`）。
 
 真正薄弱的是 **Roslyn DiagnosticAnalyzer / CodeFix 面**：
 
@@ -34,7 +34,7 @@
 
 ---
 
-## 建议落地顺序（约 2.6 量级）
+## 建议落地顺序（1.0.1 之后）
 
 ```mermaid
 flowchart LR
@@ -191,14 +191,14 @@ Morph / Relation 硬编码 `AutoCodeModeIds`；自定义 mode Id 时可能静默
 | 文档 | 关系 |
 |------|------|
 | [ROADMAP.md](ROADMAP.md) | 高层优先级与非目标；本文为其 **Analyzers DX 细则** |
-| [IMPROVEMENT_PLAN.md](IMPROVEMENT_PLAN.md) | 2.5 前阶段 A–I 归档 |
+| [IMPROVEMENT_PLAN.md](IMPROVEMENT_PLAN.md) | 阶段 A–I 归档（阶段号非 NuGet 版本） |
 | [AI_CONSUMER_GUIDE.md](AI_CONSUMER_GUIDE.md) | 消费方 Agent 指南；落地诊断后需同步 Mccj 表与决策树 |
-| [UPGRADE_1x_TO_2x.md](UPGRADE_1x_TO_2x.md) | 升级节奏；CodeFix 修好后可弱化「手写脚本迁移」描述 |
+| [UPGRADE.md](UPGRADE.md) | 升级节奏；CodeFix 修好后可弱化「手写脚本迁移」描述 |
 | Analyzers README | 消费方诊断表；新 ID 正式发布时同步 |
 
 ---
 
-## 成功指标（2.6 建议）
+## 成功指标
 
 1. 使用 `Id = C.EntityId` 的标准六模式规格，IDE 能报 Mccj012 且 CodeFix 后**无需手工补** SugarTable / Namespace。
 2. 属性名与目标名一致的四段 FK，可一键改为 Relation；属性名 ≠ 目标名时有明确 Warning，而非 silent 错 Navigate。

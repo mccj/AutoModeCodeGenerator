@@ -1,14 +1,14 @@
-# Conventions 模板（可复制）
+﻿# Conventions 模板（可复制）
 
 目标：减少各项目复制 `AutoGeneratorConst` / 审计 mixin。主包 **不依赖** 任何 ORM；SqlSugar 字符串仅作示例。
 
 另见可选源码包：[`src/AutoModeCodeGenerator.Conventions.SqlSugar/`](../src/AutoModeCodeGenerator.Conventions.SqlSugar/)。
 
-> **2.5+** 推荐：列用 `[AutoCodeColumn]`、索引用 `[AutoCodeIndex]`、属性 Id 用 `ModeFlags`；审计可用 **`InjectMarkerMembers = true`** 或下方 CreateTime mixin。只挂 `ICreateTimeEntity` 却不投影 → **Mccj011**。
+> **推荐（1.0.1）：列用 `[AutoCodeColumn]`、索引用 `[AutoCodeIndex]`、属性 Id 用 `ModeFlags`；审计可用 **`InjectMarkerMembers = true`** 或下方 CreateTime mixin。只挂 `ICreateTimeEntity` 却不投影 → **Mccj011**。
 
 ## 1. Id / Suffix 常量
 
-2.2+ 推荐直接用生成器注入的 `AutoCodeCrud`。若需项目别名：
+推荐直接用生成器注入的 `AutoCodeCrud`。若需项目别名：
 
 ```csharp
 using AutoCodeGenerator;
@@ -48,7 +48,7 @@ string? Content { get; set; }
 
 ## 2. 主键 / 审计 mixin
 
-### 2.1 主键
+### 主键
 
 ```csharp
 using AutoCodeGenerator;
@@ -63,7 +63,7 @@ public interface IHasLongId
 }
 ```
 
-### 2.2 CreateTime（与 `ICreateTimeEntity<T>` 对齐）
+### CreateTime（与 `ICreateTimeEntity<T>` 对齐）
 
 运行时标记接口 **不会** 自动生成属性。必须同时继承带 `AutoCodeProperty` 的 mixin：
 
@@ -91,7 +91,7 @@ public interface DeviceBootLogs : IHasLongId, IHasCreateTime
     string? DeviceModel { get; set; }
 }
 
-// 或 2.5 自动注入（无需 IHasCreateTime）：
+// 或 InjectMarkerMembers 自动注入（无需 IHasCreateTime）：
 [AutoCodeCrudModes(
     EntityInterfaceTypes = [typeof(ICreateTimeEntity<long>)],
     InjectMarkerMembers = true,
@@ -116,7 +116,7 @@ Attributes = [string.Format(AutoCodeAttrMacros.SugarColumnDateTimeDbType, "globa
 // 或 SqlSugarAttrTemplates.DateTimeConverter("global::AutoGeneratorModels.DateTimeConverter")
 ```
 
-### 2.3 CreatedTime（Admin.NET 风格，勿与 CreateTime 混用）
+### CreatedTime（Admin.NET 风格，勿与 CreateTime 混用）
 
 ```csharp
 public interface IHasCreatedTimeAudit
@@ -131,7 +131,7 @@ public interface IHasCreatedTimeAudit
 }
 ```
 
-## 3. 列与索引（2.4）
+## 3. 列与索引
 
 ```csharp
 using AutoCodeGenerator;
@@ -182,7 +182,7 @@ public interface ProductConfigFirmwareVersionMapping : IHasLongId
 
 ## 6. Morph 与特性宏
 
-主包 `AutoCodeAttrMacros`（2.4 含长度档位）。Morph 示例：
+主包 `AutoCodeAttrMacros`（含长度档位）。Morph 示例：
 
 ```csharp
 [AutoCodeMorph(

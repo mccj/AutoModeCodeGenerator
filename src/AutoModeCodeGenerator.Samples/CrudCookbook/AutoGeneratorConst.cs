@@ -2,7 +2,7 @@ namespace Samples.CrudCookbook;
 
 /// <summary>
 /// 历史参考：生产项目常自建 Id/Suffix 常量。
-/// 2.2 起推荐直接使用 <see cref="AutoCodeGenerator.AutoCodeCrud"/>（Entity/Dto/Create/…）。
+/// 推荐直接使用 <see cref="AutoCodeGenerator.AutoCodeCrud"/>（Entity/Dto/Create/…）。
 /// 本文件保留以便对照旧 README / 升级指南中的手写六模式模板。
 /// </summary>
 internal static class AutoGeneratorConst

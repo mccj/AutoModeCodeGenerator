@@ -3,7 +3,7 @@ using AutoCodeGenerator;
 namespace Samples.CrudCookbook;
 
 /// <summary>
-/// 2.4 示例：ModeFlags + Column(Length) + CreateTime mixin + InheritDto 友好写法。
+/// 示例：ModeFlags + Column(Length) + CreateTime mixin + InheritDto 友好写法。
 /// 生产环境的 <c>AutoCodeIndex</c> / <c>AutoCodeColumn(BigString)</c> 会生成 SqlSugar 特性字符串，
 /// Samples 不引用 SqlSugar，故索引与 BigString 见文档 [CONVENTIONS_TEMPLATE.md]。
 /// </summary>
@@ -20,7 +20,7 @@ public interface IHasCreateTimeMixin
     System.DateTime? CreateTime { get; set; }
 }
 
-/// <summary>2.5：InjectMarkerMembers 自动投影 CreateTime（无需 IHasCreateTimeMixin）。</summary>
+/// <summary>InjectMarkerMembers 自动投影 CreateTime（无需 IHasCreateTimeMixin）。</summary>
 [AutoCodeNullable(Type = NullableEnum.Enable)]
 [AutoCodeCrudModes(
     EntityInterfaceTypes = [typeof(ICreateTimeEntityMarker)],

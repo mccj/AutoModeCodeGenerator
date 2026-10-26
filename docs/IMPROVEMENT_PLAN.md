@@ -1,21 +1,21 @@
 # 改进计划（历史归档）
 
 > **本文为阶段 A–I 的完成记录，不再扩展新阶段。**  
-> 后续建议与非目标见 **[ROADMAP.md](ROADMAP.md)**；Analyzers DX 细则见 **[ANALYZER_DX_IMPROVEMENTS.md](ANALYZER_DX_IMPROVEMENTS.md)**；管线说明见 **[ARCHITECTURE.md](ARCHITECTURE.md)**。升级见 [UPGRADE_1x_TO_2x.md](UPGRADE_1x_TO_2x.md)。
+> 正式包为 **1.0.1.x**。后续见 **[ROADMAP.md](ROADMAP.md)**；DX 细则见 **[ANALYZER_DX_IMPROVEMENTS.md](ANALYZER_DX_IMPROVEMENTS.md)**；升级见 [UPGRADE.md](UPGRADE.md)。
 
-依据五个生产项目的用法调研（内部笔记，未入库）。原规划路径（已完成）：**2.1（兼容）→ 2.2（预设与关系）→ 2.3–2.5（Morph / Column / DX）**。文中部分早期草案命名（如 `AutoCodeClassModesPreset`）未采用，以最终 API 为准。
+依据五个生产项目的用法调研（内部笔记，未入库）。原规划路径（已完成）：兼容 → CRUD 预设与关系 → Morph / Column / DX。文中部分早期草案命名未采用，以最终 API 为准。
 
-> **状态（2026-10-25）：** 阶段 A–I 已全部落地（至 **2.5.0**）。后续见 [ROADMAP.md](ROADMAP.md)（含 **2.6** Obsolete / 双主入口）。
+> **状态：** 阶段 A–I 已落地，随 **1.0.1.0** 发包（含 Obsolete / 双主入口）。
 
 ```mermaid
 flowchart LR
-  docs[文档与Samples对齐CRUD] --> r1[2.1 兼容与诊断]
-    r1 --> r2[2.2 CRUD预设]
-    r2 --> r3[2.2 关系助手]
-    r3 --> r4[2.3 Morph与特性模板]
-    r4 --> r5[可选 Conventions包]
-    r5 --> r6[2.4 契约诊断与列索引]
-    r6 --> r7[2.5 DX与注入]
+  docs[A 文档与Samples] --> r1[B 兼容与诊断]
+  r1 --> r2[C CRUD预设]
+  r2 --> r3[D 关系助手]
+  r3 --> r4[E Morph与特性模板]
+  r4 --> r5[F Conventions包]
+  r5 --> r6[H 契约诊断与列索引]
+  r6 --> r7[I DX与注入]
 ```
 
 ---
@@ -35,23 +35,23 @@ flowchart LR
 
 ---
 
-## 阶段 B — 2.1 兼容增强与诊断（短周期） ✅（并入 2.2.0）
+## 阶段 B — 兼容增强与诊断（短周期） ✅（并入 1.0.1）
 
-**目标：** 不改变 API 形状，降低现有 1.x 配方在 2.x 上的摩擦。
+**目标：** 不改变 API 形状，降低现有 1.0.0.x 配方升级到 1.0.1.x 的摩擦。
 
 | ID | 任务 | 优先级 | 说明 |
 |----|------|--------|------|
-| B1 | 回归：1.x CRUD 属性集在 2.0 上的兼容测试 | P0 | InheritStr、ToNullable、InterfaceTypes、Attributes、PropertyTypeStr、Suffix、多 Ids |
+| B1 | 回归：1.0.0.x CRUD 属性集在 1.0.1 上的兼容测试 | P0 | InheritStr、ToNullable、InterfaceTypes、Attributes、PropertyTypeStr、Suffix、多 Ids |
 | B2 | 诊断：`InheritStr` 目标类型名无效时 Warning | P1 | 减少拼写错误 |
 | B3 | 诊断：建议对「仅有 Property 无 ClassModes」等已有规则补充文档示例 | P2 | 对接 Mccj004–008 |
 | B4 | `Attributes` 解析失败时给出更明确的 Mccj 诊断（若当前吞异常） | P1 | |
-| B5 | 升级指南：1.0.0.9–1.0.0.17 → 2.x | P0 | 文档：先升级包验证，再采用预设 |
+| B5 | 升级指南：1.0.0.9–1.0.0.17 → 1.0.1.x | P0 | 文档：先升级包验证，再采用预设 |
 
 **完成标准：** 用生产风格接口规格写一组集成测试；升级指南可执行。
 
 ---
 
-## 阶段 C — 2.2 CRUD 预设（核心价值） ✅
+## 阶段 C — CRUD 预设（核心价值） ✅
 
 **目标：** 消灭每实体 6 行 `AutoCodeClassModes` 样板。
 
@@ -95,7 +95,7 @@ public interface Product : BaseEntity<long>
 
 ---
 
-## 阶段 D — 2.2/2.3 关系助手 ✅（主干已在 2.2.0）
+## 阶段 D — 关系助手 ✅（主干已并入 1.0.1）
 
 **目标：** 压缩外键四段式。
 
@@ -123,7 +123,7 @@ public long Product { get; set; }
 
 ---
 
-## 阶段 E — Morph 与特性模板（2.3） ✅
+## 阶段 E — Morph 与特性模板 ✅
 
 **目标：** 覆盖文件 / 枚举 / 区间 / CSV 等双轨字段。
 
@@ -149,7 +149,7 @@ public long Product { get; set; }
 
 ---
 
-## 阶段 H — 2.4 契约诊断与 DX（基于 DeviceServer inbox 迁移） ✅
+## 阶段 H — 契约诊断与 DX（基于 DeviceServer inbox 迁移） ✅
 
 | ID | 任务 | 状态 |
 |----|------|------|
@@ -160,7 +160,7 @@ public long Product { get; set; }
 | H5 | Conventions：CreateTime mixin、长度/索引模板、Entity-only 示例 | ✅ |
 | H6 | 文档：AI 指南、升级说明、Conventions 模板、Analyzers README | ✅ |
 
-## 阶段 I — 2.5 DX 加强 ✅
+## 阶段 I — DX 加强 ✅
 
 | ID | 任务 | 状态 |
 |----|------|------|
@@ -177,9 +177,9 @@ public long Product { get; set; }
 | 默认 ClassStyle 改为 Record | **不做**（破坏全部 CRUD） |
 | Inpc 作为主推 | **降级**为扩展文档 |
 | entity.json 多 mode 深化 | **维持**现状，文档标明次要 |
-| 要求消费方立刻升 2.0 | **分阶段**：先兼容证明，再推预设 |
+| 要求消费方立刻改用 CrudModes | **分阶段**：先兼容证明，再推预设 |
 
-**2.5 之后的非目标与可选工作**已迁至 [ROADMAP.md](ROADMAP.md)；Analyzers DX 细则见 [ANALYZER_DX_IMPROVEMENTS.md](ANALYZER_DX_IMPROVEMENTS.md)，避免本计划无限加阶段。
+**阶段 I 之后的非目标与可选工作**已迁至 [ROADMAP.md](ROADMAP.md)；Analyzers DX 细则见 [ANALYZER_DX_IMPROVEMENTS.md](ANALYZER_DX_IMPROVEMENTS.md)，避免本计划无限加阶段。
 
 ---
 
@@ -188,11 +188,11 @@ public long Product { get; set; }
 | 里程碑 | 内容 | 建议 |
 |--------|------|------|
 | M0 | 阶段 A 文档/Samples | ✅ |
-| M1 | 2.1 = 阶段 B | ✅ 并入 2.2.0 |
-| M2 | 2.2 = 阶段 C + D 主干 | ✅ 2.2.0 |
-| M3 | 2.3 = 阶段 E + F | ✅ 2.3.0 |
-| M4 | 2.4 = 阶段 H | ✅ 2.4.0 |
-| M5 | 2.5 = 阶段 I | ✅ 2.5.0 |
+| M1 | 阶段 B 兼容与诊断 | ✅ 并入 **1.0.1.0** |
+| M2 | 阶段 C + D 主干 | ✅ **1.0.1.0** |
+| M3 | 阶段 E + F | ✅ **1.0.1.0** |
+| M4 | 阶段 H | ✅ **1.0.1.0** |
+| M5 | 阶段 I | ✅ **1.0.1.0** |
 
 ---
 

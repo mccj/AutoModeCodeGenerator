@@ -9,7 +9,7 @@
 		<!--生成的源代码写到我们选择的文件夹中-->
 		<EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
 		<CompilerGeneratedFilesOutputPath>$(BaseIntermediateOutputPath)Generated</CompilerGeneratedFilesOutputPath>
-		<Version>1.0.0.1-beta-2</Version>
+		<Version>1.0.1.0</Version>
 	</PropertyGroup>
 
 
@@ -20,7 +20,6 @@
 
 
 	<ItemGroup>
-		<!--<PackageReference Include="AutoModeCodeGenerator.Analyzers" Version="1.0.0.5" PrivateAssets="all" />-->
 		<ProjectReference Include="..\AutoModeCodeGenerator.Analyzers\AutoModeCodeGenerator.Analyzers.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
 	</ItemGroup>
 

@@ -9,8 +9,8 @@
 #                 https://www.nuget.org/account/apikeys
 #
 # 手动运行：Actions → Release → Run workflow
-#   - version 留空：自动计算 1.0.0.(run_number + VERSION_OFFSET)
-#   - version 填写：使用指定版本，如 1.0.0.19
+#   - version 留空：自动计算 1.0.1.(run_number + VERSION_OFFSET - 1) → 首跑 1.0.1.0
+#   - version 填写：使用指定版本，如 1.0.1.3
 # =============================================================================
 
 name: Release
@@ -22,7 +22,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: '版本号（留空则自动：1.0.0.run_number+VERSION_OFFSET）'
+        description: '版本号（留空则自动：1.0.1.(run_number-1+OFFSET)，默认首包 1.0.1.0）'
         required: false
         type: string
 
@@ -30,11 +30,9 @@ on:
 # 工作流级环境变量（所有 job/step 可用）
 # -----------------------------------------------------------------------------
 env:
-  # 自动版本号的偏移量，用于与 NuGet 已有版本衔接。
-  # 公式：1.0.0.(github.run_number + VERSION_OFFSET)
-  # 例：run_number=1、OFFSET=17 → 1.0.0.18
-  # 若改为从 1.0.0.1 起算，将 VERSION_OFFSET 设为 "0"。
-  VERSION_OFFSET: "17"
+  # 自动版本：1.0.1.(github.run_number - 1 + VERSION_OFFSET)
+  # 例：run_number=1、OFFSET=0 → 1.0.1.0（与 AppVeyor 1.0.1.{build}、仓库基线一致）
+  VERSION_OFFSET: "0"
 
 jobs:
   publish:
@@ -56,8 +54,8 @@ jobs:
             # 手动输入优先
             VERSION="${{ inputs.version }}"
           else
-            # 自动：1.0.0.{build}，build = run_number + VERSION_OFFSET
-            VERSION="1.0.0.$(( ${{ github.run_number }} + ${VERSION_OFFSET} ))"
+            # 自动：1.0.1.{n}，n = run_number - 1 + VERSION_OFFSET
+            VERSION="1.0.1.$(( ${{ github.run_number }} - 1 + ${VERSION_OFFSET} ))"
           fi
           echo "version=${VERSION}" >> $GITHUB_OUTPUT
           echo "Publishing version ${VERSION}"

@@ -2,7 +2,7 @@ using Microsoft.CodeAnalysis;
 
 namespace AutoModeCodeGenerator.Tests;
 
-public class V25FeaturesTests
+public class InjectAndDedupTests
 {
     [Fact]
     public void Dedupes_detail_property_when_inherited_from_dto()

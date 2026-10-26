@@ -3,7 +3,7 @@ using AutoCodeGenerator;
 namespace Samples.CrudCookbook;
 
 /// <summary>
-/// 生产主路径示例（2.2）：<see cref="AutoCodeCrudModesAttribute"/> + <see cref="AutoCodeRelationAttribute"/>。
+/// 生产主路径示例：<see cref="AutoCodeCrudModesAttribute"/> + <see cref="AutoCodeRelationAttribute"/>。
 /// 等价于旧版六行 <c>AutoCodeClassModes</c> + 外键四段式。
 /// </summary>
 public interface IEntityMarker

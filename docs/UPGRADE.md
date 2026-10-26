@@ -2,7 +2,7 @@
 
 面向仍钉在旧包的生产项目。建议路径：**先升到 1.0.1.0（或 AppVeyor `1.0.1.{build}`）验证 CRUD 输出 → 再按 CS0618 / Mccj012 逐步改用预设 / Relation / Column / Index / Inject**。
 
-能力对照见 [docs/README.md](README.md)「版本能力速查」；后续规划见 [ROADMAP.md](ROADMAP.md)。（仓库曾用 2.2–2.6 作里程碑标签，**未上 nuget.org**；正式包号为 1.0.1.x。）
+能力明细见根 [README](../README.md)；后续规划见 [ROADMAP.md](ROADMAP.md)。
 
 ## 1. 升包（最小变更）
 
@@ -18,14 +18,14 @@
 
 1. 还原并全量编译。
 2. 对比生成产物：Entity(`*Record`) / Dto / Create / Update / Detail / Search 类型名、继承、`ToNullable`、接口与字符串 `Attributes`。
-3. 若使用 `ClassStyle.Record` 或 Inpc：阅读 [CHANGELOG 2.0.0](../CHANGELOG.md) 破坏性说明。
-4. 多数 CRUD 项目默认 **Poco**，升 2.x **无破坏**（生成行为保留）。
+3. 若使用 `ClassStyle.Record` 或 Inpc：阅读 [CHANGELOG](../CHANGELOG.md) 中相对 1.0.0.17 的破坏性说明（Record/Inpc 语义）。
+4. 多数 CRUD 项目默认 **Poco**，升到 **1.0.1.x 无破坏**（生成行为保留）。
 5. 留意新 Warning：**Mccj011**（接口成员未投影）、**Mccj013**（索引列）、**Mccj014**（Relation 空 TargetName）；**Mccj012** 可用 Code Fix 一键改成 `AutoCodeCrudModes`。
-6. **1.0.1 CS0618**：`AutoCodeClassModes` / `*Str` / `CustomAttribute` 等带 `[Obsolete]`（`error: false`）。见下表。
+6. **CS0618**：`AutoCodeClassModes` / `*Str` / `CustomAttribute` 等带 `[Obsolete]`（`error: false`）。见下表。
 
 兼容回归由仓库 `CrudProductionParityTests` 覆盖。
 
-## 2. 2.6 Obsolete 迁移表（CS0618）
+## 2. Obsolete 迁移表（CS0618）
 
 | 旧 API | 改用 | 说明 |
 |--------|------|------|
@@ -38,18 +38,18 @@
 
 行为不变；仅编译器警告引导迁移。可用 `#pragma warning disable CS0618` 临时压制，或逐步改写。
 
-## 3. 新诊断（2.2–2.5）
+## 3. 新诊断（相对 1.0.0.17）
 
-| ID | 版本 | 含义 | 处理 |
-|----|------|------|------|
-| `Mccj009` | 2.2 | `InheritStr` 类型名非法 | 检查拼写 / `nameof`；优先改 `InheritType` |
-| `Mccj010` | 2.2 | `Attributes` 字符串无法解析 | 去掉无效片段 |
-| `Mccj011` | 2.4 | 接口成员未投影到生成类 | 增加带 `AutoCodeProperty` 的 mixin，或开 `InjectMarkerMembers` |
-| `Mccj012` | 2.4 | Info：建议改用 CrudModes | Code Fix 可一键替换（2.5） |
-| `Mccj013` | 2.4 | Index 列不在 Entity | 补字段或改 Spec |
-| `Mccj014` | 2.5 | Relation 缺 TargetName | 填写 `nameof` |
+| ID | 含义 | 处理 |
+|----|------|------|
+| `Mccj009` | `InheritStr` 类型名非法 | 检查拼写 / `nameof`；优先改 `InheritType` |
+| `Mccj010` | `Attributes` 字符串无法解析 | 去掉无效片段 |
+| `Mccj011` | 接口成员未投影到生成类 | 增加带 `AutoCodeProperty` 的 mixin，或开 `InjectMarkerMembers` |
+| `Mccj012` | Info：建议改用 CrudModes | Code Fix 可一键替换 |
+| `Mccj013` | Index 列不在 Entity | 补字段或改 Spec |
+| `Mccj014` | Relation 缺 TargetName | 填写 `nameof` |
 
-## 4. 可选：改用 `AutoCodeCrudModes`（2.2）
+## 4. 可选：改用 `AutoCodeCrudModes`
 
 ```csharp
 [AutoCodeCrudModes(EntityInterfaceTypes = [typeof(IEntity<long>)])]
@@ -57,11 +57,11 @@
 
 合并规则：同一 `Id` 的手写 `AutoCodeClassModes` **覆盖**预设。`OmitModes`：`EntityOnly`、`NoUpdate` 等。
 
-## 5. 可选：`AutoCodeRelation`（2.2） / `AutoCodeMorph`（2.3）
+## 5. 可选：`AutoCodeRelation` / `AutoCodeMorph`
 
 外键四段式 → `[AutoCodeRelation]`；文件/枚举/区间/CSV → `[AutoCodeMorph]`。
 
-## 6. 可选：列 / 索引 / ModeFlags（2.4）
+## 6. 可选：列 / 索引 / ModeFlags
 
 ```csharp
 [AutoCodeProperty(ModeFlags = AutoCodeModeFlags.EntityDtoSearch)]
@@ -73,9 +73,9 @@ string? ProductId { get; set; }
 
 手写 Create/Update/Detail 可用 `InheritDto = true` 代替 `InheritStr = nameof(X)+"Dto"`。
 
-审计：复制 [CONVENTIONS_TEMPLATE.md](CONVENTIONS_TEMPLATE.md) 中的 `IHasCreateTime`，或用 `InjectMarkerMembers = true`（2.5）。
+审计：复制 [CONVENTIONS_TEMPLATE.md](CONVENTIONS_TEMPLATE.md) 中的 `IHasCreateTime`，或用 `InjectMarkerMembers = true`。
 
-## 7. 可选：2.5 捷径
+## 7. 可选：Inject + SearchRange 捷径
 
 ```csharp
 [AutoCodeCrudModes(

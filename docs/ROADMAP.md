@@ -1,20 +1,17 @@
-﻿# 路线图与非目标（1.0.1 之后）
+# 路线图与非目标（1.0.1 之后）
 
-> nuget.org 正式包：**1.0.1.x**（AppVeyor `1.0.1.{build}`）。含原仓库里程碑 2.2–2.6 能力（**2.x 未单独发包**）；**1.0.1.0** 起 Obsolete 软弃用 + 双主入口。  
+> nuget.org 正式包：**1.0.1.x**（AppVeyor `1.0.1.{build}`）。自 **1.0.0.17** 起累计：CRUD 预设、Relation、Morph、Column/Index、Inject、诊断/CodeFix、Obsolete 软弃用、双主入口。  
 > 本文记录**仍值得做**与**明确不做**，避免继续堆 API。  
 > **Analyzers DX 细则**（DeviceServer 试点驱动）：[ANALYZER_DX_IMPROVEMENTS.md](ANALYZER_DX_IMPROVEMENTS.md)。
 
 ## 当前状态
 
-| 标签 | 主题 |
-|------|------|
-| 2.2（里程碑） | `AutoCodeCrudModes` / `AutoCodeRelation` |
-| 2.3 | `AutoCodeMorph` / AttrMacros / Conventions 包 |
-| 2.4 | `AutoCodeColumn` / `AutoCodeIndex` / `ModeFlags` / `InheritDto` / Mccj011–013 |
-| 2.5 / 2.5.1 | Detail 去重、Inject、SearchRange、Mccj014、CodeFix、`SearchRangeType` |
-| **1.0.1.0（nuget）** | Obsolete；双主入口；目录重组；自 1.0.0.17 累计发包 |
+| 包版本 | 主题 |
+|--------|------|
+| **1.0.0.17**（nuget 旧） | 手写 ClassModes / Property 主路径 |
+| **1.0.1.0+**（nuget 新） | CrudModes / Relation / Morph / Column / Index / Inject / Mccj009–014 / Obsolete / 双主入口 |
 
-消费方若仍钉在 **1.0.0.9–1.0.0.17**，优先升到 **1.0.1.x**。见 [UPGRADE_1x_TO_2x.md](UPGRADE_1x_TO_2x.md)。
+消费方若仍钉在 **1.0.0.9–1.0.0.17**，优先升到 **1.0.1.x**。见 [UPGRADE.md](UPGRADE.md)。
 
 ## 建议下一步（收益递减区）
 
@@ -41,7 +38,7 @@
 
 | 项 | 原因 |
 |----|------|
-| 删除 ClassModes / `*Str`（`error: true`） | 2.6 仅软弃用；行为保留至有明确 3.0 计划 |
+| 删除 ClassModes / `*Str`（`error: true`） | 1.0.1 仅软弃用；行为保留至有明确大版本计划 |
 | 默认 `ClassStyle.Record` / 主推 Inpc | 会破坏 CRUD POCO 假设 |
 | 主包引用 SqlSugar.dll | 保持 ORM 无关；字符串模板足够 |
 | 生成 AppService / Controller | 超出「规格 → 多产物类型」边界 |
@@ -54,7 +51,7 @@
 |------|------|
 | 人类消费方 | [Analyzers README](../src/AutoModeCodeGenerator.Analyzers/README.md) |
 | AI / Agent | [AI_CONSUMER_GUIDE.md](AI_CONSUMER_GUIDE.md) |
-| 升级 | [UPGRADE_1x_TO_2x.md](UPGRADE_1x_TO_2x.md) |
+| 升级 | [UPGRADE.md](UPGRADE.md) |
 | 约定复制 | [CONVENTIONS_TEMPLATE.md](CONVENTIONS_TEMPLATE.md) |
 | 维护者架构 | [ARCHITECTURE.md](ARCHITECTURE.md) |
 | **Analyzers DX 细则** | [ANALYZER_DX_IMPROVEMENTS.md](ANALYZER_DX_IMPROVEMENTS.md) |

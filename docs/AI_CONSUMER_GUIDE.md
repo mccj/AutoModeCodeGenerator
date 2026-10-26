@@ -1,4 +1,4 @@
-﻿# AI 消费方技术指南（AutoModeCodeGenerator）
+# AI 消费方技术指南（AutoModeCodeGenerator）
 
 > **给其他 AI / Agent 的指令文档。** 人类可读摘要见 [Analyzers README](../src/AutoModeCodeGenerator.Analyzers/README.md)。  
 > 目标版本：**1.0.1.0+**。命名空间：`AutoCodeGenerator`。包：`AutoModeCodeGenerator.Analyzers`（`PrivateAssets="all"`）。
@@ -65,7 +65,7 @@ SqlSugar 映射 + BaseCrudAppService / 手写 Service（消费方自写）
 3. **贴合现有栈** — 产物直接对接 SqlSugar + Admin.NET 式 CRUD，不另搞模型体系。  
 4. **横切可复用** — mixin + 约定常量跨实体复用，比复制整类稳。  
 5. **搜索/表单语义内建** — Search 可空、InheritDto、Relation、Morph（文件/枚举/区间）。  
-6. **样板更少（2.2–2.5）** — CRUD 预设、Relation、Morph、Column/Index、Inject、诊断/CodeFix。  
+6. **样板更少（1.0.1）** — CRUD 预设、Relation、Morph、Column/Index、Inject、诊断/CodeFix。  
 
 Agent 选型时：**优先声明式预设路径**，把上述优势落成代码；不要退回六行 ClassModes / 外键四段式，除非维护旧代码（§6）。
 
@@ -247,7 +247,7 @@ global::SqlSugar.Navigate(global::SqlSugar.NavigateType.ManyToOne, nameof({0}Id)
 
 ---
 
-## 4.5 列 / 索引 / ModeFlags（2.4）
+## 4.5 列 / 索引 / ModeFlags
 
 ```csharp
 [AutoCodeCrudModes(EntityInterfaceTypes = [typeof(ICreateTimeEntity<long>)])]
@@ -274,7 +274,7 @@ public interface InboundRaw : IHasLongId, IHasCreateTime
 
 **硬规则：** `EntityInterfaceTypes` / `InterfaceTypes` 只决定生成类 `:` 后面的接口列表；**属性必须来自** 规格或 mixin 上的 `AutoCodeProperty`。只挂 `ICreateTimeEntity` 不声明 `CreateTime` → **Mccj011** + 编译 CS0535。
 
-**2.5 捷径：**
+**Inject / SearchRange 捷径：**
 
 ```csharp
 [AutoCodeCrudModes(
@@ -430,7 +430,7 @@ Attributes = [$"global::SqlSugar.Navigate(global::SqlSugar.NavigateType.ManyToOn
 
 1. `IHasLongId` / `IHasAudit` / `IHasSoftDelete` — 仅属性 + `AutoCodeProperty`
 2. 业务接口：`[AutoCodeCrudModes]` + 继承 mixin
-3. 项目级 Const 仅当需要别名；2.2+ 直接用 `AutoCodeCrud`
+3. 项目级 Const 仅当需要别名；优先直接用 `AutoCodeCrud`
 
 完整可复制模板：[CONVENTIONS_TEMPLATE.md](CONVENTIONS_TEMPLATE.md)。
 
@@ -446,7 +446,7 @@ Attributes = [$"global::SqlSugar.Navigate(global::SqlSugar.NavigateType.ManyToOn
 
 当用户要求「用本库生成某某实体」时：
 
-1. **确认包版本** ≥ 2.5（Morph≥2.3，Column/Index≥2.4）；否则先升包（见 [UPGRADE_1x_TO_2x.md](UPGRADE_1x_TO_2x.md)）。
+1. **确认包版本** ≥ **1.0.1.0**；否则先升包（见 [UPGRADE.md](UPGRADE.md)）。
 2. **找项目惯例**：Entity 后缀？`IEntity<T>`？表名特性？有无现成 mixin？
 3. **写规格接口**（§3 模板），字段按 §3.4 选 Ids。
 4. **外键 / Morph** 用 §4 / §5；禁止发明新四段式。
@@ -481,10 +481,10 @@ ORM / 框架集成由消费方完成；生成器保持 **ORM 无关**。
 | 文档 / 代码 | 用途 |
 |-------------|------|
 | [Analyzers README](../src/AutoModeCodeGenerator.Analyzers/README.md) | 完整特性与 entity.json 参考 |
-| [UPGRADE_1x_TO_2x.md](UPGRADE_1x_TO_2x.md) | 1.x → 2.x 迁移 |
+| [UPGRADE.md](UPGRADE.md) | 1.0.0.x → 1.0.1.x 迁移 |
 | [CONVENTIONS_TEMPLATE.md](CONVENTIONS_TEMPLATE.md) | mixin / 宏模板 |
-| [ROADMAP.md](ROADMAP.md) | 2.6 之后建议与非目标 |
-| `Samples/CrudCookbook/` | 可编译金标准（含 InboundRawV24） |
+| [ROADMAP.md](ROADMAP.md) | 1.0.1 之后建议与非目标 |
+| `Samples/CrudCookbook/` | 可编译金标准（含 InboundRaw 示例） |
 | `Templates/AutoCodeAttributes.cs` | 注入 API 真源（勿复制到业务） |
 | `CrudPresetExpander.cs` / `MorphExpander.cs` / `ColumnIndexExpander.cs` | 展开语义真源 |
 

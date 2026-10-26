@@ -2,7 +2,7 @@ using Microsoft.CodeAnalysis;
 
 namespace AutoModeCodeGenerator.Tests;
 
-public class V24FeaturesTests
+public class ColumnIndexAndContractTests
 {
     [Fact]
     public void Reports_mccj011_when_interface_member_not_generated()

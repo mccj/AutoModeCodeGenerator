@@ -13,17 +13,20 @@
 
 ## 功能概览
 
-| 能力 | 版本 | 说明 |
-|------|------|------|
-| `[AutoCodeCrudModes]` | 2.2 | 一行展开 CRUD 六模式；`OmitModes` 支持 Entity-only |
-| `[AutoCodeRelation]` | 2.2 | 外键 → Id / Detail / Search / Navigate |
-| `[AutoCodeMorph]` | 2.3 | 文件 / 枚举双轨 / Search 区间 / CSV↔数组 |
-| `[AutoCodeColumn]` / `[AutoCodeIndex]` | 2.4 | 列长 / BigString / SugarIndex |
-| `ModeFlags` / `InheritDto` | 2.4 | 压缩 Ids；免拼 `InheritStr` |
-| `InjectMarkerMembers` | 2.5 | 自动投影 `InterfaceTypes` 未声明成员（如 CreateTime） |
-| Detail↔Dto 去重 | 2.5 | 继承同类型时避免 CS0108 |
-| 诊断 Mccj001–014 | 2.2–2.5 | 含 Mccj012 CodeFix「改用 AutoCodeCrudModes」 |
-| Obsolete 软弃用 | 1.0.1 | ClassModes / `*Str` / CustomAttribute → 新 API（行为保留） |
+相对 nuget.org **1.0.0.17**，自 **1.0.1.0** 起一并提供：
+
+| 能力 | 说明 |
+|------|------|
+| `[AutoCodeCrudModes]` | 一行展开 CRUD 六模式；`OmitModes` 支持 Entity-only |
+| `[AutoCodeRelation]` | 外键 → Id / Detail / Search / Navigate |
+| `[AutoCodeMorph]` | 文件 / 枚举双轨 / Search 区间 / CSV↔数组 |
+| `[AutoCodeColumn]` / `[AutoCodeIndex]` | 列长 / BigString / SugarIndex |
+| `ModeFlags` / `InheritDto` | 压缩 Ids；免拼 `InheritStr` |
+| `InjectMarkerMembers` | 自动投影 `InterfaceTypes` 未声明成员（如 CreateTime） |
+| Detail↔Dto 去重 | 继承同类型时避免 CS0108 |
+| 诊断 Mccj001–014 | 含 Mccj012 CodeFix「改用 AutoCodeCrudModes」 |
+| `SearchRangeType` / Morph `RangeType` | 区间开泛型 `typeof(...)`（亦可用字符串模板） |
+| Obsolete 软弃用 | ClassModes / `*Str` / CustomAttribute → 新 API（行为保留） |
 
 **双主入口：** 特性（CRUD 预设等）与 `.entity.json` 并列；默认 ClassStyle **Poco**。`ClassStyle.Record` / `Inpc` 为样式选项。
 
@@ -33,7 +36,7 @@
 |------|------|------|
 | [Analyzers/README.md](src/AutoModeCodeGenerator.Analyzers/README.md) | 消费方 | **主文档**：安装、CRUD、Morph、Column/Index、诊断、MSBuild |
 | [docs/AI_CONSUMER_GUIDE.md](docs/AI_CONSUMER_GUIDE.md) | **AI / Agent** | 目的/架构/优势、决策树、标准模板、禁忌、诊断速查 |
-| [docs/UPGRADE_1x_TO_2x.md](docs/UPGRADE_1x_TO_2x.md) | 消费方 | 1.0.0.x → 1.0.1.x 升级与 Obsolete 迁移 |
+| [docs/UPGRADE.md](docs/UPGRADE.md) | 消费方 | 1.0.0.x → 1.0.1.x 升级与 Obsolete 迁移 |
 | [docs/CONVENTIONS_TEMPLATE.md](docs/CONVENTIONS_TEMPLATE.md) | 消费方 | mixin / CreateTime / 列索引可复制模板 |
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | 维护者 | 双主入口、管线与分层 |
 | [docs/ROADMAP.md](docs/ROADMAP.md) | 维护者 | **1.0.1 之后**建议与非目标 |
@@ -41,7 +44,7 @@
 | [docs/IMPROVEMENT_PLAN.md](docs/IMPROVEMENT_PLAN.md) | 维护者 | 阶段 A–I 完成记录（历史） |
 | [CHANGELOG.md](CHANGELOG.md) | 所有人 | 版本变更 |
 | [PACKAGING.md](src/AutoModeCodeGenerator.Analyzers/PACKAGING.md) | 维护者 | NuGet / MyGet 发包 |
-| [Samples](src/AutoModeCodeGenerator.Samples/) | 本地验证 | CrudCookbook（含 2.4/2.5 示例） |
+| [Samples](src/AutoModeCodeGenerator.Samples/) | 本地验证 | CrudCookbook 等 |
 
 更多索引：[docs/README.md](docs/README.md)。
 
@@ -139,13 +142,13 @@ dotnet pack src/AutoModeCodeGenerator.Analyzers/AutoModeCodeGenerator.Analyzers.
 
 在 `AutoCodeGenerator.Initialize` 开头临时 `Debugger.Launch();`，编译消费项目时附加；调试完移除。
 
-## 2.0 破坏性变更（摘要）
+## 1.0.1 破坏性变更（相对 1.0.0.17）
 
 - `ClassStyle.Record` → 真正的 `record class`（`init`）
 - Inpc 基类实现 `INotifyPropertyChanged`
 - 内部命名空间改为 `AutoModeCodeGenerator.Internal`
 
-详见 [CHANGELOG.md](CHANGELOG.md)。1.x CRUD 升 2.x 默认 **Poco 无破坏**。
+详见 [CHANGELOG.md](CHANGELOG.md)。CRUD 默认 **Poco** 时升到 1.0.1.x **无破坏**。
 
 ## 许可证
 

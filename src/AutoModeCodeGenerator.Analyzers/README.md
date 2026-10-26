@@ -15,7 +15,7 @@
 | 文档 | 说明 |
 |------|------|
 | [CHANGELOG](https://github.com/mccj/AutoModeCodeGenerator/blob/main/CHANGELOG.md) | 版本变更 |
-| [升级指南](https://github.com/mccj/AutoModeCodeGenerator/blob/main/docs/UPGRADE_1x_TO_2x.md) | 1.0.0.x → 1.0.1.x（含 Obsolete 表） |
+| [升级指南](https://github.com/mccj/AutoModeCodeGenerator/blob/main/docs/UPGRADE.md) | 1.0.0.x → 1.0.1.x（含 Obsolete 表） |
 | [AI/Agent 指南](https://github.com/mccj/AutoModeCodeGenerator/blob/main/docs/AI_CONSUMER_GUIDE.md) | **目的/架构/优势**、决策树、禁忌 |
 | [Conventions 模板](https://github.com/mccj/AutoModeCodeGenerator/blob/main/docs/CONVENTIONS_TEMPLATE.md) | mixin / 列索引 |
 | [路线图](https://github.com/mccj/AutoModeCodeGenerator/blob/main/docs/ROADMAP.md) | 1.0.1 之后建议与非目标 |
@@ -25,11 +25,11 @@
 ## 目录
 
 - [安装](#安装)
-- [2.0.0 破坏性变更](#200-破坏性变更)
-- [推荐：CRUD 预设（2.2）](#推荐crud-预设22)
-- [Morph 字段变换（2.3）](#morph-字段变换23)
-- [列 / 索引 / ModeFlags（2.4）](#列--索引--modeflags24)
-- [注入 / SearchRange / CodeFix（2.5）](#25注入--searchrange--codefix)
+- [1.0.1 破坏性变更（相对 1.0.0.17）](#101-破坏性变更相对-10017)
+- [推荐：CRUD 预设](#推荐crud-预设)
+- [Morph 字段变换](#morph-字段变换)
+- [列 / 索引 / ModeFlags](#列--索引--modeflags)
+- [注入 / SearchRange / CodeFix](#注入--searchrange--codefix)
 - [手写六模式（Obsolete）](#手写六模式obsolete)
 - [快速开始（最小示例）](#快速开始最小示例)
 - [核心概念](#核心概念)
@@ -75,9 +75,9 @@
 <CompilerGeneratedFilesOutputPath>$(BaseIntermediateOutputPath)Generated</CompilerGeneratedFilesOutputPath>
 ```
 
-## 2.0.0 破坏性变更
+## 1.0.1 破坏性变更（相对 1.0.0.17）
 
-从 `1.x` 升级时请注意：
+从 `1.0.0.x` 升级到 `1.0.1.x` 时请注意（Record / Inpc 语义）：
 
 | 变更 | 影响 |
 |------|------|
@@ -87,7 +87,7 @@
 
 完整说明见仓库 [CHANGELOG.md](https://github.com/mccj/AutoModeCodeGenerator/blob/main/CHANGELOG.md)。
 
-## 推荐：CRUD 预设（2.2）
+## 推荐：CRUD 预设
 
 默认 **Poco**。用一行预设替代六行 `AutoCodeClassModes`；属性 Id 使用内置 `AutoCodeCrud` 常量。
 
@@ -131,9 +131,9 @@ public interface Product : IHasLongId
 
 将 `Id`、审计字段放在基接口上，仅标 `AutoCodeProperty`（Ids 用 `AutoCodeCrud.*`）。
 
-Samples：[`CrudCookbook/CrudProduct.cs`](https://github.com/mccj/AutoModeCodeGenerator/blob/main/src/AutoModeCodeGenerator.Samples/CrudCookbook/CrudProduct.cs)。升级步骤见 [UPGRADE_1x_TO_2x.md](https://github.com/mccj/AutoModeCodeGenerator/blob/main/docs/UPGRADE_1x_TO_2x.md)。
+Samples：[`CrudCookbook/CrudProduct.cs`](https://github.com/mccj/AutoModeCodeGenerator/blob/main/src/AutoModeCodeGenerator.Samples/CrudCookbook/CrudProduct.cs)。升级步骤见 [UPGRADE.md](https://github.com/mccj/AutoModeCodeGenerator/blob/main/docs/UPGRADE.md)。
 
-## Morph 字段变换（2.3）
+## Morph 字段变换
 
 ```csharp
 [AutoCodeMorph(Kind = AutoCodeMorphKind.File, CreateUpdateType = "UploadFileInput", DetailType = "FileOutput")]
@@ -161,7 +161,7 @@ string Tags { get; set; }
 
 类型与 `EntityAttributes` / `ApiAttributes` 均可项目级覆盖。约定模板：[CONVENTIONS_TEMPLATE.md](https://github.com/mccj/AutoModeCodeGenerator/blob/main/docs/CONVENTIONS_TEMPLATE.md)。
 
-## 列 / 索引 / ModeFlags（2.4）
+## 列 / 索引 / ModeFlags
 
 ```csharp
 [AutoCodeCrudModes(EntityInterfaceTypes = [typeof(ICreateTimeEntity<long>)])]
@@ -190,20 +190,20 @@ public interface InboundRaw : IHasLongId, IHasCreateTime
 
 手写标准六模式会收到 **Mccj012**（Info）提示改用 `AutoCodeCrudModes`。
 
-## 注入 / SearchRange / CodeFix（2.5+）
+## 注入 / SearchRange / CodeFix
 
 ```csharp
 [AutoCodeCrudModes(
     EntityInterfaceTypes = [typeof(ICreateTimeEntity<long>)],
     InjectMarkerMembers = true,
-    SearchRangeType = typeof(SearchRangeForStructValue<>))] // 2.5.1+；也可用 SearchRangeTemplate 字符串
+    SearchRangeType = typeof(SearchRangeForStructValue<>))] // 亦可用 SearchRangeTemplate 字符串
 public interface BootLog : IHasLongId { /* ... */ }
 ```
 
 | 能力 | 说明 |
 |------|------|
 | `InjectMarkerMembers` | 为 `EntityInterfaceTypes` / `InterfaceTypes` 中尚未投影的成员补 Entity/Dto（DateTime 等进 Search 区间） |
-| `SearchRangeType` | `typeof(开泛型<>)`，展开为 `…<{0}>`（**2.5.1**） |
+| `SearchRangeType` | `typeof(开泛型<>)`，展开为 `…<{0}>`（1.0.1） |
 | `SearchRangeTemplate` | 字符串模板；与 Type **兼容**，非空时优先于 Type；再空则用 MSBuild `AutoModeSearchRangeTemplate` |
 | Morph `RangeType` / `RangeTypeTemplate` | 属性级同样支持 Type 或字符串（字符串优先） |
 | Detail 去重 | Create/Update/Detail 继承 Dto 且同名同类型时不重复生成属性（避免 CS0108） |
@@ -352,11 +352,11 @@ CRUD 与多数场景保持默认 **Poco**。`Record` / `Inpc` 按需选用（特
 
 ### AutoCodeCrudModesAttribute / AutoCodeCrud / AutoCodeRelationAttribute
 
-见上文「推荐：CRUD 预设（2.2）」。`AutoCodeCrud` 提供 mode Id 与默认 Suffix 常量；`AutoCodeCrudOmit` 为 Flags。
+见上文「推荐：CRUD 预设」。`AutoCodeCrud` 提供 mode Id 与默认 Suffix 常量；`AutoCodeCrudOmit` 为 Flags。
 
 ### AutoCodeMorphAttribute / AutoCodeAttrMacros
 
-见上文「Morph 字段变换（2.3）」。
+见上文「Morph 字段变换」。
 
 ### AutoCodeClassModesAttribute
 
